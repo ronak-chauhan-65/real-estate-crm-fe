@@ -33,10 +33,10 @@ const PopoverDropdown = ({
   const isPlaceholder = !selectedValue;
 
   return (
-    <div className="relative w-full ">
-      <div className="text-[12px] pb-[8px] font-bold">
+    <div className="relative w-full py-[4px]">
+      <div className="text-[12px]  font-bold ">
         {label && (
-          <legend className="flex gap-2">
+          <legend className="fieldset-legend my-[-6px] w-fit">
             {label}
             {required && <span className="text-error">*</span>}
           </legend>

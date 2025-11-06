@@ -9,20 +9,73 @@ function Building() {
   const [onEditID, setonEditID] = useState("");
 
   const [formData, setFormData] = useState({
-    pincode: "",
+    // Basic Information
+    buildingName: "",
+    nameofBuilder: "",
+    address: "",
+    landmark: "",
     area: "",
     city: "",
     state: "",
-    status: true,
+    pincode: "",
+    primebuilding: false,
+
+    // Other Details
+    year: "",
+    floors: "",
+    units: "",
+    lifts: "",
+
+    // Property Settings
+    propertyTypes: [],
+    restrictedUsers: [],
+    buildingStatus: "",
+    buildingQuality: "",
+
+    // Amenities (checkboxes)
+    "Prime Building": false,
+    "Swimming Pool": false,
+    "Club House": false,
+    "Passenger Lift": false,
+    Gym: false,
+    "Garden & Children Play Area": false,
+    "Central AC": false,
+    "Service Lift": false,
+    "Stretcher Lift": false,
+
+    // Contact Details (if exists in child)
+    contactDetails: [{ name: "", number: "" }],
+
+    // Security Details (if exists in child)
+    securityDetails: [{ name: "", number: "" }],
   });
 
   const [validationObj, setvalidationObj] = useState({
-    pincodeError: false,
+    buildingNameError: false,
+    qualityofBuildingError: false,
     areaError: false,
-    cityError: false,
-    stateError: false,
-    statusError: false,
   });
+
+  const formValidation = () => {
+    // check validation conditions
+    const buildingNameError =
+      !formData?.buildingName || formData?.buildingName.trim().length < 2;
+
+    const qualityofBuildingError =
+      !formData?.buildingQuality || formData?.buildingQuality === "";
+
+    const areaError = !formData?.area || formData?.area.trim().length < 2;
+
+    // update validation state (for UI errors)
+    setvalidationObj({
+      buildingNameError,
+      qualityofBuildingError,
+      areaError,
+    });
+
+    // return overall form validity
+    return !buildingNameError && !qualityofBuildingError && !areaError;
+  };
 
   // Update drawer  field values
   const handleChange = useCallback((field, value) => {
@@ -34,7 +87,61 @@ function Building() {
   };
 
   // save the area using drawer
-  const handleSave = async () => {};
+  const handleSave = async () => {
+    console.log(formData, "formDataformData");
+  };
+
+  const addContactSection = () => {
+    setFormData((prev) => {
+      if (prev.contactDetails.length >= 2) return prev;
+      return {
+        ...prev,
+        contactDetails: [...prev.contactDetails, { name: "", number: "" }],
+      };
+    });
+  };
+  // Remove contact section (except first)
+  const removeContactSection = (index) => {
+    setFormData((prev) => {
+      const updated = prev.contactDetails.filter((_, i) => i !== index);
+      return { ...prev, contactDetails: updated };
+    });
+  };
+
+  // Add security section (max 2)
+  const addSecuritySection = () => {
+    setFormData((prev) => {
+      if (prev.securityDetails.length >= 2) return prev;
+      return {
+        ...prev,
+        securityDetails: [...prev.securityDetails, { name: "", number: "" }],
+      };
+    });
+  };
+
+  // Remove security section (except first)
+  const removeSecuritySection = (index) => {
+    setFormData((prev) => {
+      const updated = prev.securityDetails.filter((_, i) => i !== index);
+      return { ...prev, securityDetails: updated };
+    });
+  };
+
+  const handleContactChange = (index, field, value) => {
+    setFormData((prev) => {
+      const updated = [...prev.contactDetails];
+      updated[index][field] = value;
+      return { ...prev, contactDetails: updated };
+    });
+  };
+
+  const handleSecurityChange = (index, field, value) => {
+    setFormData((prev) => {
+      const updated = [...prev.securityDetails];
+      updated[index][field] = value;
+      return { ...prev, securityDetails: updated };
+    });
+  };
 
   // Drawer Footer
   const drawerFooter = (
@@ -126,6 +233,12 @@ function Building() {
               formData={formData}
               validationObj={validationObj}
               handleChange={handleChange}
+              addContactSection={addContactSection}
+              removeContactSection={removeContactSection}
+              addSecuritySection={addSecuritySection}
+              removeSecuritySection={removeSecuritySection}
+              handleContactChange={handleContactChange}
+              handleSecurityChange={handleSecurityChange}
             />
           </Drawer>
         </div>
