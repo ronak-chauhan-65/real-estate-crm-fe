@@ -4,7 +4,7 @@ import axios from "axios";
 export const callApi = async (bodyObj = {}) => {
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const token = localStorage.getItem("token");
-  console.log(BASE_URL, token, "incall API ");
+
   try {
     const {
       endpoint = "",
