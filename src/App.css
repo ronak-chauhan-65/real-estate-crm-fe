@@ -1,0 +1,56 @@
+@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+/* @plugin "daisyui" {
+  themes: light --default, dark --prefersdark;
+} */
+
+@plugin "daisyui";
+@plugin "daisyui/theme" {
+  name: "light";
+  default: true;
+
+  --color-base-100: "#F5F5F5";
+  --color-accent: white;
+  --color-info: "#253360";
+  --color-success: "#80D8C3";
+  --color-warning: orange;
+  --color-error: red;
+  --color-primary: "#0F0E0E";
+  --color-secondary: "#465C88";
+}
+
+@plugin "daisyui/theme" {
+  name: "dark";
+
+  --color-base-100: "#37353E";
+  --color-accent: black;
+  --color-info: "#4DA8DA";
+  --color-success: "#80D8C3";
+  --color-warning: orange;
+  --color-error: red;
+  --color-primary: "#fff";
+  --color-secondary: "#fff";
+}
+
+/* Remove Tippy default black background */
+.tippy-box[data-theme~="custom"] {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.tippy-box[data-theme~="custom"] .tippy-content {
+  padding: 0 !important;
+}
+
+/* Remove the black arrow */
+.tippy-box[data-theme~="custom"] > .tippy-arrow {
+  /* display: none !important; */
+  color: #0dcaf0 !important;
+}
+.custom-step::before {
+  background-color: #3b82f6 !important; /* Tailwind blue-500 */
+  color: white !important; /* for icon contrast */
+}
