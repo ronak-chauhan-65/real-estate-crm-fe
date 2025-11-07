@@ -57,7 +57,7 @@ const SearchableDropdown = ({
   return (
     <div className="relative w-full py-[4px]" ref={dropdownRef}>
       {label && (
-        <legend className="text-[12px] py-[8px] font-bold my-[-2px] w-fit">
+        <legend className="text-[12px] py-[8px] font-bold my-[-2px] w-fit fieldset-legend ">
           {label}
           {required && <span className="text-error">*</span>}
         </legend>

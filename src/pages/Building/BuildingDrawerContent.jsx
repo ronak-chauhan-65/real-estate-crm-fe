@@ -119,6 +119,12 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
           label: "Prime building",
           placeholder: "Enter building name",
         },
+        {
+          type: "checkbox",
+          name: "status",
+          label: "Status",
+          placeholder: "Enter building name",
+        },
       ],
     },
     {
@@ -219,45 +225,78 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
                   {field.type === "text" ||
                   field.type === "number" ||
                   field.type === "email" ? (
-                    <InputTag
-                      label={field.label}
-                      placeholder={field.placeholder}
-                      type={field.type}
-                      value={formData?.[field.name] || ""}
-                      onChange={(e) => handleChange(field.name, e.target.value)}
-                      required={field.required}
-                    />
+                    <div className="relative">
+                      <InputTag
+                        label={field.label}
+                        placeholder={field.placeholder}
+                        type={field.type}
+                        value={formData?.[field.name] || ""}
+                        onChange={(e) =>
+                          handleChange(field.name, e.target.value)
+                        }
+                        required={field.required}
+                      />
+                      {field.required &&
+                        validationObj?.buildingNameError &&
+                        !formData.buildingName && (
+                          <p className="text-red-500 text-[12px] absolute bottom-[-17px]">
+                            Building name must be at least 2 characters long
+                          </p>
+                        )}{" "}
+                    </div>
                   ) : field.type === "dropdown" ? (
-                    <Dropdown
-                      label={field.label}
-                      required={field.required}
-                      items={field.items}
-                      buttonLabel={formData?.[field.name] || field.placeholder}
-                      value={formData?.[field.name]}
-                      onSelect={(item) => handleChange(field.name, item)}
-                      widthClass="w-[46%]"
-                    />
+                    <div className="relative">
+                      <Dropdown
+                        label={field.label}
+                        required={field.required}
+                        items={field.items}
+                        buttonLabel={
+                          formData?.[field.name] || field.placeholder
+                        }
+                        value={formData?.[field.name]}
+                        onSelect={(item) => handleChange(field.name, item)}
+                        widthClass="w-[46%]"
+                      />
+                      {field.required &&
+                        validationObj?.qualityofBuildingError &&
+                        !formData.qualityOfBuilding && (
+                          <p className="text-red-500 text-[12px] absolute bottom-[-17px]">
+                            Quality of Building must be at required
+                          </p>
+                        )}{" "}
+                    </div>
                   ) : field.type === "searchdropdown" ? (
-                    <SearchableDropdown
-                      label={field.label}
-                      required={field.required}
-                      items={field.items}
-                      buttonLabel={formData?.[field.name] || field.placeholder}
-                      value={formData?.[field.name]}
-                      isplaceholder="Search area"
-                      onSelect={(id, item) => {
-                        handleChange(field.name, id); // store area _id
-                        setFormData((prev) => ({
-                          ...prev,
-                          city: item.city,
-                          state: item.state,
-                          pincode: item.pincode,
-                        }));
-                      }}
-                      widthClass="w-full"
-                      minCharsToOpen={3}
-                      onSearchChange={setsearchValue} // 👈 this is key
-                    />
+                    <div className="relative">
+                      <SearchableDropdown
+                        label={field.label}
+                        required={field.required}
+                        items={field.items}
+                        buttonLabel={
+                          formData?.[field.name] || field.placeholder
+                        }
+                        value={formData?.[field.name]}
+                        isplaceholder="Search area"
+                        onSelect={(id, item) => {
+                          handleChange(field.name, id); // store area _id
+                          setFormData((prev) => ({
+                            ...prev,
+                            city: item.city,
+                            state: item.state,
+                            pincode: item.pincode,
+                          }));
+                        }}
+                        widthClass="w-full"
+                        minCharsToOpen={3}
+                        onSearchChange={setsearchValue} // 👈 this is key
+                      />
+                      {field.required &&
+                        validationObj?.areaError &&
+                        !formData.area && (
+                          <p className="text-red-500 text-[12px] absolute bottom-[-17px]">
+                            Area must be at required
+                          </p>
+                        )}{" "}
+                    </div>
                   ) : field.type === "checkbox" ? (
                     <label key={idx} className="flex items-center gap-2 mt-2">
                       <input

@@ -1,13 +1,18 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import Drawer from "../../components/Drawer/Drawer";
 import BuildingDrawerContent from "./BuildingDrawerContent";
 import { BuildingApi } from "../../components/APICalls/BuildingApi";
+import { showToast } from "../../utils/toastUtils";
+import useClickOutside from "../../CustomHook/useClickOutside";
+import Table from "../../components/Table/Table";
 
 function Building() {
   // State Declarations
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const [onEditID, setonEditID] = useState("");
+  const [showFilter, setshowFilter] = useState(false);
+  const [loader, setloader] = useState(false);
 
   const [formData, setFormData] = useState({
     // Basic Information
@@ -20,6 +25,7 @@ function Building() {
     state: "",
     pincode: "",
     primebuilding: false,
+    status: true,
 
     // Other Details
     year: "",
@@ -51,11 +57,45 @@ function Building() {
     securityDetails: [{ name: "", number: "" }],
   });
 
+  const [getAreas, setgetAreas] = useState({
+    currentPage: 1,
+    perPage: 10,
+    success: true,
+    totalCount: 0,
+    totalPages: 0,
+    areas: [],
+  });
+
+  const [getApiParams, setgetApiParams] = useState({
+    perPage: 10,
+    currentPage: 1,
+    status: "active",
+    searchKey: "",
+  });
+
   const [validationObj, setvalidationObj] = useState({
     buildingNameError: false,
     qualityofBuildingError: false,
     areaError: false,
   });
+
+  const ref = useRef();
+
+  useClickOutside(ref, () => setshowFilter(false));
+
+  // Table Configuration
+  const tableHeaderData = useMemo(
+    () => [
+      { name: "Area", isSort: false },
+      { name: "Pincode", isSort: false },
+      { name: "City", isSort: false },
+      { name: "State", isSort: false },
+
+      { name: "Updated At", isSort: false },
+      { name: "Action", isSort: false, center: true },
+    ],
+    []
+  );
 
   const formValidation = () => {
     // check validation conditions
@@ -63,7 +103,7 @@ function Building() {
       !formData?.buildingName || formData?.buildingName.trim().length < 2;
 
     const qualityofBuildingError =
-      !formData?.buildingQuality || formData?.buildingQuality === "";
+      !formData?.qualityOfBuilding || formData?.qualityOfBuilding === "";
 
     const areaError = !formData?.area || formData?.area.trim().length < 2;
 
@@ -78,15 +118,31 @@ function Building() {
     return !buildingNameError && !qualityofBuildingError && !areaError;
   };
 
+  // handle  parameter change for get api
+  const handleApiParams = useCallback((field, value) => {
+    setgetApiParams((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
+  // handle search parameter change for get api
+  const handleParamsChange = (e) => {
+    const value = e.target.value.trimStart();
+    handleApiParams("searchKey", value);
+  };
+
   // Update drawer  field values
   const handleChange = useCallback((field, value) => {
-    console.log(value, "value");
-
     setFormData((prev) => ({ ...prev, [field]: value }));
   }, []);
 
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
+
+    setvalidationObj({
+      buildingNameError: false,
+      qualityofBuildingError: false,
+      areaError: false,
+    });
+
     setFormData({
       buildingName: "",
       nameofBuilder: "",
@@ -121,16 +177,17 @@ function Building() {
 
   // save the area using drawer
   const handleSave = async () => {
-    console.log(formData, "formDataformData");
-    const repsonse = await BuildingApi.PostBuiling(
-      formData,
-    );
-    if (repsonse.success) {
-      showToast("success", repsonse?.data?.msg);
-      handleCloseDrawer();
-      setisRefresh((prev) => !prev);
-    } else {
-      showToast("error", repsonse?.error?.msg);
+    console.log(formValidation(), validationObj);
+    if (formValidation()) {
+      const repsonse = await BuildingApi.PostBuiling(formData);
+
+      if (repsonse.success) {
+        showToast("success", repsonse?.data?.msg);
+        handleCloseDrawer();
+        setisRefresh((prev) => !prev);
+      } else {
+        showToast("error", repsonse?.error?.msg);
+      }
     }
   };
 
@@ -215,7 +272,7 @@ function Building() {
         </div>
 
         <div className="flex gap-3 ">
-          {/* <div className=" ">
+          <div className=" ">
             <input
               type="text"
               placeholder="search area"
@@ -223,8 +280,8 @@ function Building() {
               onChange={handleParamsChange}
               className="!w-full !block h-full border rounded px-3 rounded-[15px]  "
             />
-          </div> */}
-          {/* <div ref={ref} className="">
+          </div>
+          <div ref={ref} className="">
             <button
               onClick={() => setshowFilter((prev) => !prev)}
               className="btn btn-info text-accent rounded-[15px]  w-[100px] capitalize"
@@ -254,7 +311,7 @@ function Building() {
                 </li>
               </ul>
             )}
-          </div> */}
+          </div>
 
           <button
             className="btn btn-info text-accent rounded-[15px]"
@@ -288,6 +345,29 @@ function Building() {
             )}
           </Drawer>
         </div>
+      </div>
+
+      <div className="w-full">
+        {loader ? (
+          <div className="flex flex-col items-center justify-center py-10  w-full h-full ">
+            <span className="loading loading-spinner loading-lg text-info"></span>
+            <p className="text-sm text-gray-400 mt-2">Loading areas...</p>
+          </div>
+        ) : (
+          <div className="text-secondary  pb-0  bg-accent rounded-[25px]  overflow-x-scroll ">
+            <Table
+              tableHeaderData={tableHeaderData}
+              showPagination={true}
+              totalData={getAreas?.totalCount}
+              scrollToTop={true}
+              currentPage={getApiParams?.currentPage}
+              perPage={getApiParams?.perPage}
+              onPageChange={(v) => handleApiParams("currentPage", v)}
+            >
+              {/* {rows} */}
+            </Table>
+          </div>
+        )}
       </div>
     </div>
   );
