@@ -8,3 +8,11 @@ export const masterConfigAPI = {
       params,
     }),
 };
+
+export async function getMasterConfigg(params) {
+  return await callApi({
+    endpoint: "/masterConfig",
+    method: "GET",
+    params,
+  });
+}
