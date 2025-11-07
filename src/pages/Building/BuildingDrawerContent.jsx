@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import InputTag from "../../components/Input/InputTag";
 import Dropdown from "../../components/Dropdown/Dropdown";
 import MultiSelectDropdown from "../../components/Dropdown/MultiSelectDropdown";
 import { PropertyTypes } from "../../components/CommonFunctions/PropertyType";
+import SearchableDropdown from "../../components/Dropdown/SearchableDropdown";
+import { AreaApiList } from "../../components/APICalls/areaApi";
 
 const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
   formData,
@@ -14,10 +16,46 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
   handleSecurityChange,
   removeSecuritySection,
   removeContactSection,
+  setFormData,
 }) {
-  const [contactSections, setContactSections] = useState([0]);
-  const [securitySections, setSecuritySections] = useState([0]);
-  // --- HANDLERS FOR ADD / REMOVE ---
+  const [areas, setAreas] = useState([]);
+  const [searchValue, setsearchValue] = useState("");
+
+  // Fetch area list once
+  const getArea = async (searchKey = "") => {
+    const response = await AreaApiList.getAllArea({
+      status: "active",
+      searchKey: searchKey,
+    });
+
+    setAreas(response?.data?.areas || []);
+  };
+
+  // useEffect(() => {
+  //   if (!areas.length || !formData?.area) return;
+
+  //   const findCommon = areas.find((v) => v.area === formData.area);
+
+  //   if (findCommon) {
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       city: findCommon.city,
+  //       state: findCommon.state,
+  //       pincode: findCommon.pincode,
+  //     }));
+  //   }
+  // }, [formData.area, areas]);
+
+  useEffect(() => {
+    getArea("");
+  }, [formData?.area]);
+
+  // Call API when user types 3+ letters
+  useEffect(() => {
+    if (searchValue.length >= 3) {
+      getArea(searchValue);
+    }
+  }, [searchValue]);
 
   // --- SECTIONS CONFIGS ---
   const sections = [
@@ -50,11 +88,12 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
           placeholder: "Enter nearby landmark",
         },
         {
-          type: "dropdown",
+          type: "searchdropdown",
           name: "area",
           label: "Area",
           placeholder: "Enter area",
           required: true,
+          items: areas,
         },
         {
           type: "text",
@@ -137,7 +176,7 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
         },
         {
           type: "dropdown",
-          name: "buildingQuality",
+          name: "qualityOfBuilding",
           label: "Quality of Building",
           placeholder: "Select quality",
           items: PropertyTypes(),
@@ -176,7 +215,7 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
           {section.fields && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
               {section.fields.map((field, idx) => (
-                <div key={idx} className="relative border border-red-500 ">
+                <div key={idx} className="relative ">
                   {field.type === "text" ||
                   field.type === "number" ||
                   field.type === "email" ? (
@@ -196,7 +235,28 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
                       buttonLabel={formData?.[field.name] || field.placeholder}
                       value={formData?.[field.name]}
                       onSelect={(item) => handleChange(field.name, item)}
+                      widthClass="w-[46%]"
+                    />
+                  ) : field.type === "searchdropdown" ? (
+                    <SearchableDropdown
+                      label={field.label}
+                      required={field.required}
+                      items={field.items}
+                      buttonLabel={formData?.[field.name] || field.placeholder}
+                      value={formData?.[field.name]}
+                      isplaceholder="Search area"
+                      onSelect={(id, item) => {
+                        handleChange(field.name, id); // store area _id
+                        setFormData((prev) => ({
+                          ...prev,
+                          city: item.city,
+                          state: item.state,
+                          pincode: item.pincode,
+                        }));
+                      }}
                       widthClass="w-full"
+                      minCharsToOpen={3}
+                      onSearchChange={setsearchValue} // 👈 this is key
                     />
                   ) : field.type === "checkbox" ? (
                     <label key={idx} className="flex items-center gap-2 mt-2">
@@ -216,7 +276,7 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
                       required={field.required}
                       items={field.items}
                       buttonLabel={field.placeholder}
-                      widthClass="w-full"
+                      widthClass="w-[46%]"
                       value={formData?.[field.name] || []}
                       onChange={(values) => handleChange(field.name, values)}
                     />

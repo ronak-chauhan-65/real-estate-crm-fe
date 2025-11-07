@@ -36,7 +36,7 @@ const PopoverDropdown = ({
     <div className="relative w-full py-[4px]">
       <div className="text-[12px]  font-bold ">
         {label && (
-          <legend className="fieldset-legend my-[-6px] w-fit">
+          <legend className="fieldset-legend  mb-[px]   w-fit">
             {label}
             {required && <span className="text-error">*</span>}
           </legend>
@@ -44,7 +44,7 @@ const PopoverDropdown = ({
       </div>
       {/* Trigger Button */}
       <button
-        className={`${btnClass} border h-[40px] rounded px-4 w-full text-[14px] text-left ${
+        className={`${btnClass} border border-gray-300 h-[40px] rounded px-4 w-full text-[14px] text-left bg-base-100 ${
           isPlaceholder ? "font-medium text-gray-400" : " text-black"
         } flex justify-between items-center`}
         popoverTarget={popoverId}
@@ -58,7 +58,7 @@ const PopoverDropdown = ({
       <ul
         id={popoverId}
         popover={position}
-        className={`dropdown menu rounded-box bg-base-100 shadow-sm ${widthClass} ${className}`}
+        className={`dropdown menu rounded-box bg-base-100 shadow-sm absolute ${widthClass} ${className}`}
         style={{ positionAnchor: anchorName }}
       >
         {items.map((item, idx) => (

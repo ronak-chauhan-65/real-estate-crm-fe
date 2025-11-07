@@ -30,8 +30,6 @@ export const callApi = async (bodyObj = {}) => {
       params: method === "GET" || method === "DELETE" ? params : undefined,
     };
 
-    console.log(config, "configconfigconfig");
-
     const response = await axios(config);
     return { success: true, data: response.data };
   } catch (error) {

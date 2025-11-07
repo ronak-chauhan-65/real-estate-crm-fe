@@ -14,7 +14,7 @@ const InputTag = ({
     <div className={`w-full ${className}`}>
       <fieldset className="fieldset">
         {label && (
-          <legend className="fieldset-legend">
+          <legend className="fieldset-legend ">
             {label} {required && <span className="text-error">*</span>}
           </legend>
         )}

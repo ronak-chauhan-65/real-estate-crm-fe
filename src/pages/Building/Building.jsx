@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from "react";
 import Drawer from "../../components/Drawer/Drawer";
 import BuildingDrawerContent from "./BuildingDrawerContent";
+import { BuildingApi } from "../../components/APICalls/BuildingApi";
 
 function Building() {
   // State Declarations
@@ -30,7 +31,7 @@ function Building() {
     propertyTypes: [],
     restrictedUsers: [],
     buildingStatus: "",
-    buildingQuality: "",
+    qualityOfBuilding: "",
 
     // Amenities (checkboxes)
     "Prime Building": false,
@@ -79,16 +80,58 @@ function Building() {
 
   // Update drawer  field values
   const handleChange = useCallback((field, value) => {
+    console.log(value, "value");
+
     setFormData((prev) => ({ ...prev, [field]: value }));
   }, []);
 
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
+    setFormData({
+      buildingName: "",
+      nameofBuilder: "",
+      address: "",
+      landmark: "",
+      area: "",
+      city: "",
+      state: "",
+      pincode: "",
+      primebuilding: false,
+      year: "",
+      floors: "",
+      units: "",
+      lifts: "",
+      propertyTypes: [],
+      restrictedUsers: [],
+      buildingStatus: "",
+      qualityOfBuilding: "",
+      "Prime Building": false,
+      "Swimming Pool": false,
+      "Club House": false,
+      "Passenger Lift": false,
+      Gym: false,
+      "Garden & Children Play Area": false,
+      "Central AC": false,
+      "Service Lift": false,
+      "Stretcher Lift": false,
+      contactDetails: [{ name: "", number: "" }],
+      securityDetails: [{ name: "", number: "" }],
+    });
   };
 
   // save the area using drawer
   const handleSave = async () => {
     console.log(formData, "formDataformData");
+    const repsonse = await BuildingApi.PostBuiling(
+      formData,
+    );
+    if (repsonse.success) {
+      showToast("success", repsonse?.data?.msg);
+      handleCloseDrawer();
+      setisRefresh((prev) => !prev);
+    } else {
+      showToast("error", repsonse?.error?.msg);
+    }
   };
 
   const addContactSection = () => {
@@ -229,17 +272,20 @@ function Building() {
             onEditID={onEditID}
             widthClass=" lg:w-1/2 w-full   "
           >
-            <BuildingDrawerContent
-              formData={formData}
-              validationObj={validationObj}
-              handleChange={handleChange}
-              addContactSection={addContactSection}
-              removeContactSection={removeContactSection}
-              addSecuritySection={addSecuritySection}
-              removeSecuritySection={removeSecuritySection}
-              handleContactChange={handleContactChange}
-              handleSecurityChange={handleSecurityChange}
-            />
+            {isDrawerOpen && (
+              <BuildingDrawerContent
+                formData={formData}
+                validationObj={validationObj}
+                handleChange={handleChange}
+                addContactSection={addContactSection}
+                removeContactSection={removeContactSection}
+                addSecuritySection={addSecuritySection}
+                removeSecuritySection={removeSecuritySection}
+                handleContactChange={handleContactChange}
+                handleSecurityChange={handleSecurityChange}
+                setFormData={setFormData}
+              />
+            )}
           </Drawer>
         </div>
       </div>

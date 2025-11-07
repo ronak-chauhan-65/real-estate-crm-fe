@@ -60,7 +60,7 @@ const MultiSelectDropdown = ({
 
       {/* Trigger Button */}
       <button
-        className={`${btnClass} border h-[40px] rounded  w-full text-[14px] text-left ${
+        className={`${btnClass}  border border-gray-300 h-[40px] rounded bg-base-100  w-full text-[14px] text-left ${
           isPlaceholder ? "font-medium text-gray-400" : "text-black"
         } flex justify-between items-center`}
         popoverTarget={popoverId}
@@ -74,7 +74,7 @@ const MultiSelectDropdown = ({
       <ul
         id={popoverId}
         popover={position}
-        className={`dropdown menu  rounded-box bg-base-100 shadow-sm ${widthClass} ${className}`}
+        className={`dropdown menu absolute  rounded-box bg-base-100 shadow-sm ${widthClass} ${className}`}
         style={{ positionAnchor: anchorName }}
       >
         {items.map((item, idx) => (
