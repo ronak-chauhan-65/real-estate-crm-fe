@@ -1,27 +1,27 @@
 import { callApi } from "./callApi";
 
 export const BuildingApi = {
-  getBuiling: async (params) =>
+  getBuilding: async (data) =>
     await callApi({
-      endpoint: "/config/property-plan-type",
-      method: "GET",
-      params,
+      endpoint: "/building/getAll",
+      method: "POST",
+      body: data,
     }),
-  PostBuiling: async (data) =>
+  PostBuilding: async (data) =>
     await callApi({
       endpoint: "/building",
       method: "POST",
       body: data,
     }),
-  DeleteBuiling: async (id) =>
+  DeleteBuilding: async (id) =>
     await callApi({
-      endpoint: `/config/property-plan-type`,
+      endpoint: `/building`,
       method: "DELETE",
       id: id,
     }),
   UpdateBuilding: async (id, data) =>
     await callApi({
-      endpoint: `/config/property-plan-type`,
+      endpoint: `/building`,
       method: "PATCH",
       id, // goes in URL → /config/property-plan-type/:id
       body: data, // the updated fields

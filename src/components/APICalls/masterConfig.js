@@ -16,3 +16,11 @@ export async function getMasterConfigg(params) {
     params,
   });
 }
+
+export async function postMasterConfigg(data) {
+  return await callApi({
+    endpoint: "/masterConfig",
+    method: "POST",
+    body: data,
+  });
+}

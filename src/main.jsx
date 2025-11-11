@@ -3,11 +3,12 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
 import "./App.css";
-// import { AuthProvider } from "./components/AuthProvider/AuthProvider.jsx";
+import { AuthProvider } from "./components/AuthProvider/AuthProvider.jsx";
 
 createRoot(document.getElementById("root")).render(
   <div>
-    {/* <AuthProvider> */} <App />
-    {/* </AuthProvider> */}
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </div>
 );

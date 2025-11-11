@@ -8,24 +8,34 @@ const SearchableDropdown = ({
   btnClass = "btn",
   widthClass = "w-52",
   onSelect,
-  value,
+  value, // expects { id, area } object
   label = "",
   required = false,
   searchable = true,
   placeholder = "Search items...",
   minCharsToOpen = 3,
-  isplaceholder = "swel",
-  onSearchChange, // 👈 parent callback for search term
+  isplaceholder = "Search...",
+  onSearchChange,
 }) => {
-  const [selectedValue, setSelectedValue] = useState(value || null);
+  const [selectedValue, setSelectedValue] = useState(value?.id || "");
+  const [selectedLabel, setSelectedLabel] = useState(value?.area || "");
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Sync value from parent
+  // Sync value from parent (like on edit)
   useEffect(() => {
-    if (value !== undefined) setSelectedValue(value);
+    if (value) {
+      setSelectedValue(value?.id || "");
+      setSelectedLabel(value?.area || "");
+    }
   }, [value]);
+
+  // Update label if items change
+  useEffect(() => {
+    const foundItem = items.find((i) => i._id === selectedValue);
+    if (foundItem) setSelectedLabel(foundItem.area);
+  }, [selectedValue, items]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -38,26 +48,38 @@ const SearchableDropdown = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Trigger parent search API
   useEffect(() => {
     if (searchTerm.length >= minCharsToOpen) {
       onSearchChange?.(searchTerm);
+    } else if (searchTerm.length === 0) {
+      onSearchChange?.("");
     }
   }, [searchTerm, minCharsToOpen, onSearchChange]);
 
+  // Reset search when closed
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchTerm("");
+      onSearchChange?.("");
+    }
+  }, [isOpen, onSearchChange]);
+
+  // Handle item selection
   const handleSelect = (item) => {
     setSelectedValue(item._id);
-    onSelect?.(item._id, item); // Pass id + full item (for optional extra info)
-    setIsOpen(false);
-    setSearchTerm("");
-  };
+    setSelectedLabel(item.area);
 
-  const selectedItem = items.find((i) => i._id === selectedValue);
-  const selectedLabel = selectedItem?.area || buttonLabel;
+    // ✅ Send both id and name back to parent
+    onSelect?.({ id: item._id, area: item.area }, item);
+
+    setIsOpen(false);
+  };
 
   return (
     <div className="relative w-full py-[4px]" ref={dropdownRef}>
       {label && (
-        <legend className="text-[12px] py-[8px] font-bold my-[-2px] w-fit fieldset-legend ">
+        <legend className="text-[12px] py-[8px] font-bold my-[-2px] w-fit fieldset-legend">
           {label}
           {required && <span className="text-error">*</span>}
         </legend>
@@ -66,11 +88,11 @@ const SearchableDropdown = ({
       <button
         type="button"
         className={`${btnClass} border border-gray-300 h-[40px] rounded px-3 w-full text-[14px] text-left bg-base-100 ${
-          placeholder ? "font-medium text-gray-400" : "text-black"
+          selectedLabel ? "text-black" : "text-gray-400"
         } flex justify-between items-center`}
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        {selectedLabel}
+        {selectedLabel || buttonLabel}
         <span className="ml-2">▾</span>
       </button>
 
@@ -96,8 +118,8 @@ const SearchableDropdown = ({
                 <li key={idx}>
                   <a
                     onClick={() => handleSelect(item)}
-                    className={`block px-4 py-2 rounded-md cursor-pointer text-[14px] hover:bg-info/10 active:bg-blue-100 ${
-                      selectedValue === item.area
+                    className={`block px-4 py-2 rounded-md cursor-pointer text-[14px] hover:bg-info/10 ${
+                      selectedValue === item._id
                         ? "font-semibold text-primary"
                         : "text-gray-700"
                     }`}

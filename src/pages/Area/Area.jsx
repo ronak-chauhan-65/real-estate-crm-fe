@@ -92,16 +92,17 @@ function Area() {
       searchKey: getApiParams?.searchKey,
     });
 
-    if (response?.data?.areas.length) {
-      setgetAreas({
-        currentPage: response?.data?.currentPage ?? 1,
-        perPage: response?.data?.perPage ?? 10,
-        success: response?.data?.success ?? false,
-        totalCount: response?.data?.totalCount ?? 0,
-        totalPages: response?.data?.totalPages ?? 0,
-        areas: response?.data?.areas ?? [],
-      });
-    }
+    const data = response?.data;
+
+    setgetAreas({
+      currentPage: data?.currentPage ?? 1,
+      perPage: data?.perPage ?? 10,
+      success: data?.success ?? false,
+      totalCount: data?.totalCount ?? 0,
+      totalPages: data?.totalPages ?? 0,
+      areas: data?.areas ?? [],
+    });
+
     setloader(false);
   };
 
@@ -264,7 +265,7 @@ function Area() {
       ) {
         getArea();
       }
-    }, 400); // 400ms debounce to prevent spam API calls
+    }, 200); // 400ms debounce to prevent spam API calls
 
     return () => clearTimeout(delayDebounce);
   }, [
@@ -370,6 +371,13 @@ function Area() {
               currentPage={getApiParams?.currentPage}
               perPage={getApiParams?.perPage}
               onPageChange={(v) => handleApiParams("currentPage", v)}
+              onPerPageChange={(v) => {
+                setgetApiParams({
+                  ...getApiParams,
+                  perPage: v,
+                });
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
             >
               {rows}
             </Table>

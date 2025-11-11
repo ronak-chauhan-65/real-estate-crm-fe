@@ -5,6 +5,8 @@ import MultiSelectDropdown from "../../components/Dropdown/MultiSelectDropdown";
 import { PropertyTypes } from "../../components/CommonFunctions/PropertyType";
 import SearchableDropdown from "../../components/Dropdown/SearchableDropdown";
 import { AreaApiList } from "../../components/APICalls/areaApi";
+import { QualityofBuilding } from "../../components/CommonFunctions/QualityofBuilding";
+import { PropertyTypeApiList } from "../../components/APICalls/Configure";
 
 const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
   formData,
@@ -19,7 +21,9 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
   setFormData,
 }) {
   const [areas, setAreas] = useState([]);
+  const [propertyType, setpropertyType] = useState([]);
   const [searchValue, setsearchValue] = useState("");
+  const [initialLoaded, setInitialLoaded] = useState(false);
 
   // Fetch area list once
   const getArea = async (searchKey = "") => {
@@ -31,28 +35,32 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
     setAreas(response?.data?.areas || []);
   };
 
-  // useEffect(() => {
-  //   if (!areas.length || !formData?.area) return;
+  const getPropertyTypes = async () => {
+    const response = await PropertyTypeApiList.getPropertyType();
 
-  //   const findCommon = areas.find((v) => v.area === formData.area);
+    const formatted =
+      response?.data?.data?.map((pt) => ({
+        label: pt.name,
+        value: pt._id,
+      })) || [];
 
-  //   if (findCommon) {
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       city: findCommon.city,
-  //       state: findCommon.state,
-  //       pincode: findCommon.pincode,
-  //     }));
-  //   }
-  // }, [formData.area, areas]);
+    setpropertyType(formatted);
+  };
 
   useEffect(() => {
-    getArea("");
-  }, [formData?.area]);
+    if (!initialLoaded) {
+      getArea("");
+      setInitialLoaded(true);
+    }
+  }, [initialLoaded]);
+
+  useEffect(() => {
+    getPropertyTypes();
+  }, []);
 
   // Call API when user types 3+ letters
   useEffect(() => {
-    if (searchValue.length >= 3) {
+    if (searchValue.length >= 3 || searchValue == "") {
       getArea(searchValue);
     }
   }, [searchValue]);
@@ -161,14 +169,14 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
       fields: [
         {
           type: "multi",
-          name: "propertyTypes",
+          name: "propertyType",
           label: "Property Type",
           placeholder: "Select property type",
-          items: PropertyTypes(),
+          items: propertyType,
         },
         {
           type: "multi",
-          name: "restrictedUsers",
+          name: "restrictedUser",
           label: "Restricted Users",
           placeholder: "Select restricted users",
           items: PropertyTypes(),
@@ -185,7 +193,7 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
           name: "qualityOfBuilding",
           label: "Quality of Building",
           placeholder: "Select quality",
-          items: PropertyTypes(),
+          items: QualityofBuilding(),
           required: true,
         },
       ],
@@ -272,22 +280,27 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
                         required={field.required}
                         items={field.items}
                         buttonLabel={
-                          formData?.[field.name] || field.placeholder
-                        }
-                        value={formData?.[field.name]}
+                          formData?.[field.name]?.area || field.placeholder
+                        } // ✅ show area name
+                        value={formData?.[field.name]} // ✅ expects { id, area }
                         isplaceholder="Search area"
-                        onSelect={(id, item) => {
-                          handleChange(field.name, id); // store area _id
+                        onSelect={(selectedItem, rawItem) => {
+                          // ✅ 'selectedItem' is { id, area }
+                          // ✅ 'rawItem' is the full API item (has city, state, pincode)
+
+                          handleChange(field.name, selectedItem); // ✅ store { id, area } in formData
+
+                          // ✅ auto-fill related fields
                           setFormData((prev) => ({
                             ...prev,
-                            city: item.city,
-                            state: item.state,
-                            pincode: item.pincode,
+                            city: rawItem.city || prev.city,
+                            state: rawItem.state || prev.state,
+                            pincode: rawItem.pincode || prev.pincode,
                           }));
                         }}
                         widthClass="w-full"
                         minCharsToOpen={3}
-                        onSearchChange={setsearchValue} // 👈 this is key
+                        onSearchChange={setsearchValue} // ✅ triggers API search
                       />
                       {field.required &&
                         validationObj?.areaError &&
@@ -354,7 +367,7 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
       <div className="border border-accent rounded-[16px] p-4 bg-base-100 shadow-md">
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-lg font-semibold text-info">Contact Details</h3>
-          {formData.contactDetails.length < 2 && (
+          {formData?.contactDetails?.length < 2 && (
             <button
               className="btn btn-sm btn-outline btn-info hover:text-accent"
               onClick={addContactSection}
@@ -364,7 +377,7 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
           )}
         </div>
 
-        {formData.contactDetails.map((contact, index) => (
+        {formData?.contactDetails?.map((contact, index) => (
           <div
             key={index}
             className="relative border border-base-200 rounded-lg p-4 mb-4"
@@ -404,7 +417,7 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
       <div className="border border-accent rounded-[16px] p-4 bg-base-100 shadow-md">
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-lg font-semibold text-info">Security Details</h3>
-          {formData.securityDetails.length < 2 && (
+          {formData?.securityDetails?.length < 2 && (
             <button
               className="btn btn-sm btn-outline btn-info hover:text-accent"
               onClick={addSecuritySection}
@@ -414,7 +427,7 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
           )}
         </div>
 
-        {formData.securityDetails.map((security, index) => (
+        {formData?.securityDetails?.map((security, index) => (
           <div
             key={index}
             className="relative border border-base-200 rounded-lg p-4 mb-4"

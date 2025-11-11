@@ -14,7 +14,6 @@ export const AreaApiList = {
       endpoint: `/area`,
       method: "DELETE",
       id: id,
-      user: { role: "ADMIN" },
     }),
   UpdateArea: async (id, data) =>
     await callApi({

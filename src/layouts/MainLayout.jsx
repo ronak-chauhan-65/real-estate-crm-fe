@@ -56,6 +56,10 @@ function MainLayout() {
           name: "Building configuration",
           link: "/settings/buildingconfiguration",
         },
+        {
+          name: "Property configuration",
+          link: "/settings/propertyconfiguration",
+        },
         { name: "Users", link: "/settings/users" },
       ],
     },

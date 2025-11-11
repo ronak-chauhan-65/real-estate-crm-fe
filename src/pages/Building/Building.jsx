@@ -1,10 +1,18 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Drawer from "../../components/Drawer/Drawer";
 import BuildingDrawerContent from "./BuildingDrawerContent";
 import { BuildingApi } from "../../components/APICalls/BuildingApi";
 import { showToast } from "../../utils/toastUtils";
 import useClickOutside from "../../CustomHook/useClickOutside";
 import Table from "../../components/Table/Table";
+import NodataFound from "../../components/NoDataFound/NodataFound";
+import BuilidingTableRow from "./BuilidingTableRow";
 
 function Building() {
   // State Declarations
@@ -13,6 +21,7 @@ function Building() {
   const [onEditID, setonEditID] = useState("");
   const [showFilter, setshowFilter] = useState(false);
   const [loader, setloader] = useState(false);
+  const [isRefresh, setisRefresh] = useState(false);
 
   const [formData, setFormData] = useState({
     // Basic Information
@@ -20,7 +29,7 @@ function Building() {
     nameofBuilder: "",
     address: "",
     landmark: "",
-    area: "",
+    area: { id: "", area: "" },
     city: "",
     state: "",
     pincode: "",
@@ -34,8 +43,8 @@ function Building() {
     lifts: "",
 
     // Property Settings
-    propertyTypes: [],
-    restrictedUsers: [],
+    propertyType: [],
+    restrictedUser: [],
     buildingStatus: "",
     qualityOfBuilding: "",
 
@@ -57,13 +66,13 @@ function Building() {
     securityDetails: [{ name: "", number: "" }],
   });
 
-  const [getAreas, setgetAreas] = useState({
+  const [getBuilding, setgetBuilding] = useState({
     currentPage: 1,
     perPage: 10,
     success: true,
     totalCount: 0,
     totalPages: 0,
-    areas: [],
+    buildings: [],
   });
 
   const [getApiParams, setgetApiParams] = useState({
@@ -86,12 +95,10 @@ function Building() {
   // Table Configuration
   const tableHeaderData = useMemo(
     () => [
-      { name: "Area", isSort: false },
-      { name: "Pincode", isSort: false },
-      { name: "City", isSort: false },
-      { name: "State", isSort: false },
-
-      { name: "Updated At", isSort: false },
+      { name: "Building Name", isSort: false },
+      { name: "Adress", isSort: false },
+      { name: "Name of builder", isSort: false },
+      { name: "Property Type", isSort: false },
       { name: "Action", isSort: false, center: true },
     ],
     []
@@ -105,7 +112,7 @@ function Building() {
     const qualityofBuildingError =
       !formData?.qualityOfBuilding || formData?.qualityOfBuilding === "";
 
-    const areaError = !formData?.area || formData?.area.trim().length < 2;
+    const areaError = !formData?.area;
 
     // update validation state (for UI errors)
     setvalidationObj({
@@ -116,6 +123,30 @@ function Building() {
 
     // return overall form validity
     return !buildingNameError && !qualityofBuildingError && !areaError;
+  };
+
+  // get Area
+  const getBuildingRow = async () => {
+    setloader(true);
+    const response = await BuildingApi.getBuilding({
+      perPage: getApiParams?.perPage,
+      currentPage: getApiParams?.currentPage,
+      status: getApiParams?.status,
+      searchKey: getApiParams?.searchKey,
+    });
+
+    const data = response?.data;
+
+    setgetBuilding({
+      currentPage: data?.currentPage ?? 1,
+      perPage: data?.perPage ?? 10,
+      success: data?.success ?? false,
+      totalCount: data?.totalCount ?? 0,
+      totalPages: data?.totalPages ?? 0,
+      buildings: data?.buildings ?? [],
+    });
+
+    setloader(false);
   };
 
   // handle  parameter change for get api
@@ -157,8 +188,8 @@ function Building() {
       floors: "",
       units: "",
       lifts: "",
-      propertyTypes: [],
-      restrictedUsers: [],
+      propertyType: [],
+      restrictedUser: [],
       buildingStatus: "",
       qualityOfBuilding: "",
       "Prime Building": false,
@@ -173,22 +204,6 @@ function Building() {
       contactDetails: [{ name: "", number: "" }],
       securityDetails: [{ name: "", number: "" }],
     });
-  };
-
-  // save the area using drawer
-  const handleSave = async () => {
-    console.log(formValidation(), validationObj);
-    if (formValidation()) {
-      const repsonse = await BuildingApi.PostBuiling(formData);
-
-      if (repsonse.success) {
-        showToast("success", repsonse?.data?.msg);
-        handleCloseDrawer();
-        setisRefresh((prev) => !prev);
-      } else {
-        showToast("error", repsonse?.error?.msg);
-      }
-    }
   };
 
   const addContactSection = () => {
@@ -243,6 +258,145 @@ function Building() {
     });
   };
 
+  // save the area using drawer
+  const handleSave = async () => {
+    console.log(formValidation(), validationObj);
+
+    if (!formValidation()) return;
+
+    const payload = {
+      ...formData,
+
+      // send only area ID, not object
+      area: formData?.area?.id || formData?.area || "",
+
+      // send only property type IDs
+      propertyType: formData?.propertyType?.map((pt) => pt._id || pt) || [],
+
+      // send only restricted user IDs
+      restrictedUser: formData?.restrictedUser?.map((u) => u._id || u) || [],
+
+      // normalize amenities to match backend keys
+      amenities: {
+        swimmingPool: formData["Swimming Pool"] || false,
+        passengerLift: formData["Passenger Lift"] || false,
+        gardenPlayArea: formData["Garden & Children Play Area"] || false,
+        serviceLift: formData["Service Lift"] || false,
+        clubHouse: formData["Club House"] || false,
+        gym: formData["Gym"] || false,
+        centralAC: formData["Central AC"] || false,
+        streatureLift: formData["Stretcher Lift"] || false,
+      },
+    };
+
+    try {
+      let response;
+      if (!onEditID) {
+        response = await BuildingApi.PostBuilding(payload);
+      } else {
+        response = await BuildingApi.UpdateBuilding(onEditID, payload);
+      }
+
+      if (response?.success) {
+        showToast("success", response?.data?.msg);
+        handleCloseDrawer();
+        setisRefresh((prev) => !prev);
+      } else {
+        showToast("error", response?.error?.msg || "Something went wrong");
+      }
+    } catch (err) {
+      console.error("Error saving building:", err);
+      showToast("error", "Server error while saving building");
+    }
+  };
+
+  // edit property type
+  const handleEdit = useCallback(async (data) => {
+    console.log(data);
+
+    setFormData({
+      // Basic Information
+      buildingName: data?.buildingName || "",
+      nameofBuilder: data?.nameOfBuilder || "",
+      address: data?.address || "",
+      landmark: data?.landMark || "",
+      area: { id: data?.area?._id || "", area: data?.area?.area || "" },
+      city: data?.city || "",
+      state: data?.state || "",
+      pincode: data?.pincode || "",
+      primebuilding: data?.primeBuilding || false,
+      status: data?.status ?? true,
+
+      // Other Details
+      year: data?.yearOfBuildingPossession || "",
+      floors: data?.noOfFloor || "",
+      units: data?.noOfUnit || "",
+      lifts: data?.noOfLiftEachBlock || "",
+
+      // Property Settings
+      propertyType: data?.propertyType || [],
+      restrictedUser: data?.restrictedUser || [],
+      buildingStatus: data?.buildingStatus || "",
+      qualityOfBuilding: data?.qualityOfBuilding || "",
+
+      // Amenities
+      "Swimming Pool": data?.amenities?.swimmingPool || false,
+      "Club House": data?.amenities?.clubHouse || false,
+      "Passenger Lift": data?.amenities?.passengerLift || false,
+      Gym: data?.amenities?.gym || false,
+      "Garden & Children Play Area": data?.amenities?.gardenPlayArea || false,
+      "Central AC": data?.amenities?.centralAC || false,
+      "Service Lift": data?.amenities?.serviceLift || false,
+      "Stretcher Lift": data?.amenities?.streatureLift || false, // note: spelling in API
+
+      // Contact & Security Details
+      contactDetails: data?.contactDetails?.length
+        ? data.contactDetails
+        : [{ name: "", number: "" }],
+      securityDetails: data?.securityDetails?.length
+        ? data.securityDetails
+        : [{ name: "", number: "" }],
+    });
+
+    setIsDrawerOpen(true);
+    setonEditID(data?._id);
+  }, []);
+
+  // delete base on id
+  const handleDelete = useCallback(async (id) => {
+    const response = await BuildingApi.DeleteBuilding(id);
+    if (response.success) {
+      showToast("success", response?.data?.msg);
+      setisRefresh((prev) => !prev);
+    } else {
+      showToast("error", response?.error?.msg);
+    }
+  }, []);
+
+  // table row
+  const rows = useMemo(() => {
+    // If no areas, show "No data"
+    if (!getBuilding?.buildings || getBuilding?.buildings.length === 0) {
+      return (
+        <tr>
+          <td colSpan="100%" className="text-center py-4 text-gray-500 ">
+            <NodataFound />
+          </td>
+        </tr>
+      );
+    }
+
+    // Otherwise render area rows
+    return getBuilding.buildings.map((item) => (
+      <BuilidingTableRow
+        key={item._id || item.id} // use _id if API gives it
+        item={item}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+    ));
+  }, [getBuilding, handleEdit, handleDelete]);
+
   // Drawer Footer
   const drawerFooter = (
     <div className="flex gap-3 w-full">
@@ -257,6 +411,28 @@ function Building() {
       </button>
     </div>
   );
+
+  // call get api base on get paraneter  change
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      // Fetch when user clears search OR types 3+ characters
+      if (
+        getApiParams.searchKey.length === 0 ||
+        getApiParams.searchKey.length >= 3
+      ) {
+        getBuildingRow();
+      }
+    }, 200); // 400ms debounce to prevent spam API calls
+
+    return () => clearTimeout(delayDebounce);
+  }, [
+    isRefresh,
+    getApiParams.currentPage,
+    getApiParams.perPage,
+    getApiParams.status,
+    getApiParams.searchKey,
+  ]);
+
   return (
     <div className=" mx-[1rem] lg:mx-[2rem]    ">
       {/* Header Section */}
@@ -317,7 +493,7 @@ function Building() {
             className="btn btn-info text-accent rounded-[15px]"
             onClick={() => setIsDrawerOpen(true)}
           >
-            <span class="material-symbols-outlined">add</span> Add Building
+            <span className="material-symbols-outlined">add</span> Add Building
           </button>
 
           <Drawer
@@ -358,13 +534,20 @@ function Building() {
             <Table
               tableHeaderData={tableHeaderData}
               showPagination={true}
-              totalData={getAreas?.totalCount}
+              totalData={getBuilding?.totalCount}
               scrollToTop={true}
               currentPage={getApiParams?.currentPage}
               perPage={getApiParams?.perPage}
               onPageChange={(v) => handleApiParams("currentPage", v)}
+              onPerPageChange={(v) => {
+                setgetApiParams({
+                  ...getApiParams,
+                  perPage: v,
+                });
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
             >
-              {/* {rows} */}
+              {rows}
             </Table>
           </div>
         )}

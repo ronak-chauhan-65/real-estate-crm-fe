@@ -12,6 +12,8 @@ const MultiSelectDropdown = ({
   label = "",
   required = false,
 }) => {
+ 
+
   const popoverId = useId();
   const anchorName = `--anchor-${popoverId}`;
   const [selectedValues, setSelectedValues] = useState(value || []);
@@ -36,8 +38,8 @@ const MultiSelectDropdown = ({
 
   // Determine button text
   const selectedLabels = items
-    .filter((item) => selectedValues.includes(item.value))
-    .map((item) => item.label);
+    ?.filter((item) => selectedValues.includes(item?.value))
+    ?.map((item) => item?.label);
 
   const displayLabel =
     selectedLabels.length > 0

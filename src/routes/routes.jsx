@@ -10,6 +10,7 @@ import Propertysource from "../pages/Settings/PropertySource";
 import PropertyType from "../pages/Settings/PropertyType";
 import { Navigate } from "react-router-dom";
 import Buildingconfiguration from "../pages/BuildingConfiguration/Buildingconfiguration";
+import Propertyconfiguration from "../pages/PropertyConfiguration/Propertyconfiguration";
 
 export const appRoutes = [
   { path: "/", element: <Navigate to="/dashboard" replace /> },
@@ -38,5 +39,10 @@ export const appRoutes = [
     path: "/settings/buildingconfiguration",
     label: "Building configuration",
     element: <Buildingconfiguration />,
+  },
+  {
+    path: "/settings/propertyconfiguration",
+    label: "Property configuration",
+    element: <Propertyconfiguration />,
   },
 ];

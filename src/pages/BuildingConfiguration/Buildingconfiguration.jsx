@@ -34,6 +34,7 @@ function Buildingconfiguration() {
       const resp = await getMasterConfigg(params);
 
       const responseData = resp?.data?.data ?? {};
+      // console.log(responseData, "responseData");
 
       setConfigOptions((prev) =>
         prev.map((item) => ({
@@ -61,8 +62,21 @@ function Buildingconfiguration() {
       </div> */}
 
       <div className="flex flex-col gap-[1rem]">
-        {configOptions.map((item) => (
-          <BuildingCommonComp item={item} key={item.key} />
+        {configOptions.map((item, index) => (
+          <BuildingCommonComp
+            item={item}
+            key={item.key}
+            index={index}
+            onRefresh={async (key) => {
+              const updated = await getMasterConfigg({ key });
+              const updatedData = updated?.data?.data?.[key] || [];
+              setConfigOptions((prev) =>
+                prev.map((cfg) =>
+                  cfg.key === key ? { ...cfg, data: updatedData } : cfg
+                )
+              );
+            }}
+          />
         ))}
       </div>
     </div>
