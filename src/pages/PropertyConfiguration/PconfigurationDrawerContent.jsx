@@ -82,7 +82,7 @@ const PconfigurationDrawerContent = React.memo(
           { name: "name", label: "Property Measurement Type", type: "text" },
         ],
       }),
-      [ConstructionData] // 👈 recompute map when dropdown data changes
+      [ConstructionData]
     );
 
     const currentFields = configFieldMap[field] || [];
@@ -120,7 +120,7 @@ const PconfigurationDrawerContent = React.memo(
                   buttonLabel={formData?.[f.name]?.name || f.label}
                   value={formData?.[f.name]}
                   onSelect={(item) => handleChange(f.name, item)}
-                  widthClass="w-[46%]"
+                  widthClass="w-[90%]"
                 />
                 {validationObj?.propertyConstructionType && (
                   <p className="text-red-500 text-[12px] absolute bottom-[-17px]">

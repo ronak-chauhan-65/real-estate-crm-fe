@@ -97,7 +97,7 @@ function PropertyCommonComponent({ item, index, onRefresh }) {
 
     setFormData({ name: item?.name });
     setIsDrawerOpen(true);
-    setonEditID(user?._id);
+    setonEditID(item?._id);
   }, []);
 
   // Table Configuration
@@ -176,13 +176,15 @@ function PropertyCommonComponent({ item, index, onRefresh }) {
             footer={drawerFooter}
             onEditID={onEditID}
           >
-            <PconfigurationDrawerContent
-              formData={formData}
-              validationObj={validationObj}
-              handleChange={handleChange}
-              field={item.key}
-              refreshDropdown={refreshDropdown}
-            />
+            {isDrawerOpen && (
+              <PconfigurationDrawerContent
+                formData={formData}
+                validationObj={validationObj}
+                handleChange={handleChange}
+                field={item.key}
+                refreshDropdown={refreshDropdown}
+              />
+            )}
           </Drawer>
         </div>
       </div>

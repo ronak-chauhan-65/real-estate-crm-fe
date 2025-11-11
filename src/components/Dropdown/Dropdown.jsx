@@ -58,7 +58,7 @@ const PopoverDropdown = ({
       <ul
         id={popoverId}
         popover={position}
-        className={`dropdown menu rounded-box bg-base-100 shadow-sm absolute ${widthClass} ${className}`}
+        className={`dropdown menu rounded-box bg-base-100 shadow-sm max-h-[200px] absolute ${widthClass} ${className}`}
         style={{ positionAnchor: anchorName }}
       >
         {items.map((item, idx) => (
