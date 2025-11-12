@@ -24,6 +24,7 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
   const [areas, setAreas] = useState([]);
   const [propertyType, setpropertyType] = useState([]);
   const [restrictedUser, setrestrictedUser] = useState([]);
+  const [buildingStatus, setbuildingStatus] = useState([]);
   const [searchValue, setsearchValue] = useState("");
   const [initialLoaded, setInitialLoaded] = useState(false);
 
@@ -38,15 +39,18 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
   };
 
   const params = {
-    key: ["PROPERTY_PLAN_TYPE", "BUILDING_RESTRICTION"].join(","),
+    key: [
+      "BUILDING_ARCHITECTURE_TYPE",
+      "BUILDING_RESTRICTION",
+      "BUILDING_PROGRESS",
+    ].join(","),
   };
 
   const getPropertyTypes = async () => {
     const response = await getMasterConfigg(params);
-    console.log(response, "responseresponse11111");
 
     const formatted =
-      response?.data?.data?.PROPERTY_PLAN_TYPE?.map((pt) => ({
+      response?.data?.data?.BUILDING_ARCHITECTURE_TYPE?.map((pt) => ({
         label: pt.name,
         value: pt._id,
       })) || [];
@@ -57,8 +61,15 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
         value: br._id,
       })) || [];
 
+    const setbuildingStatusFormat =
+      response?.data?.data?.BUILDING_PROGRESS?.map((br) => ({
+        label: br.name,
+        value: br._id,
+      })) || [];
+
     setpropertyType(formatted);
     setrestrictedUser(restrictedFormat);
+    setbuildingStatus(setbuildingStatusFormat);
   };
 
   useEffect(() => {
@@ -93,7 +104,7 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
         },
         {
           type: "text",
-          name: "nameofBuilder",
+          name: "nameOfBuilder",
           label: "Name of Builder",
           placeholder: "Enter building name",
         },
@@ -105,7 +116,7 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
         },
         {
           type: "text",
-          name: "landmark",
+          name: "landMark",
           label: "Landmark",
           placeholder: "Enter nearby landmark",
         },
@@ -137,7 +148,7 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
         },
         {
           type: "checkbox",
-          name: "primebuilding",
+          name: "primeBuilding",
           label: "Prime building",
           placeholder: "Enter building name",
         },
@@ -154,25 +165,25 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
       fields: [
         {
           type: "number",
-          name: "year",
+          name: "yearOfBuildingPossession",
           label: "Year of Building Possession",
           placeholder: "Enter year",
         },
         {
           type: "number",
-          name: "floors",
+          name: "noOfFloor",
           label: "Number of Floors",
           placeholder: "Enter floor count",
         },
         {
           type: "number",
-          name: "units",
+          name: "noOfUnit",
           label: "Number of Units",
           placeholder: "Enter unit count",
         },
         {
           type: "number",
-          name: "lifts",
+          name: "noOfLiftEachBlock",
           label: "Lifts per Block",
           placeholder: "Enter number of lifts",
         },
@@ -200,7 +211,7 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
           name: "buildingStatus",
           label: "Building Status",
           placeholder: "Select status",
-          items: PropertyTypes(),
+          items: buildingStatus,
         },
         {
           type: "dropdown",
@@ -408,18 +419,22 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
               <InputTag
                 label="Contact Person Name"
                 placeholder="Enter name"
-                value={contact.name}
+                value={contact.contactPersonName}
                 onChange={(e) =>
-                  handleContactChange(index, "name", e.target.value)
+                  handleContactChange(
+                    index,
+                    "contactPersonName",
+                    e.target.value
+                  )
                 }
               />
               <InputTag
                 label="Contact Number"
                 placeholder="Enter phone number"
                 type="number"
-                value={contact.number}
+                value={contact.contactPersonNo}
                 onChange={(e) =>
-                  handleContactChange(index, "number", e.target.value)
+                  handleContactChange(index, "contactPersonNo", e.target.value)
                 }
               />
             </div>
@@ -458,18 +473,22 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
               <InputTag
                 label="Security Person Name"
                 placeholder="Enter name"
-                value={security.name}
+                value={security.nameOfSecurity}
                 onChange={(e) =>
-                  handleSecurityChange(index, "name", e.target.value)
+                  handleSecurityChange(index, "nameOfSecurity", e.target.value)
                 }
               />
               <InputTag
                 label="Security Contact Number"
                 placeholder="Enter contact number"
                 type="number"
-                value={security.number}
+                value={security.contactNoOfSecurity}
                 onChange={(e) =>
-                  handleSecurityChange(index, "number", e.target.value)
+                  handleSecurityChange(
+                    index,
+                    "contactNoOfSecurity",
+                    e.target.value
+                  )
                 }
               />
             </div>

@@ -26,21 +26,21 @@ function Building() {
   const [formData, setFormData] = useState({
     // Basic Information
     buildingName: "",
-    nameofBuilder: "",
+    nameOfBuilder: "",
     address: "",
-    landmark: "",
+    landMark: "",
     area: { id: "", area: "" },
     city: "",
     state: "",
     pincode: "",
-    primebuilding: false,
+    primeBuilding: false,
     status: true,
 
     // Other Details
-    year: "",
-    floors: "",
-    units: "",
-    lifts: "",
+    yearOfBuildingPossession: 0,
+    noOfFloor: 0,
+    noOfUnit: 0,
+    noOfLiftEachBlock: 0,
 
     // Property Settings
     propertyType: [],
@@ -167,7 +167,7 @@ function Building() {
 
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
-
+    setonEditID("");
     setvalidationObj({
       buildingNameError: false,
       qualityofBuildingError: false,
@@ -176,18 +176,18 @@ function Building() {
 
     setFormData({
       buildingName: "",
-      nameofBuilder: "",
+      nameOfBuilder: "",
       address: "",
-      landmark: "",
+      landMark: "",
       area: "",
       city: "",
       state: "",
       pincode: "",
-      primebuilding: false,
-      year: "",
-      floors: "",
-      units: "",
-      lifts: "",
+      primeBuilding: false,
+      yearOfBuildingPossession: 0,
+      noOfFloor: 0,
+      noOfUnit: 0,
+      noOfLiftEachBlock: 0,
       propertyType: [],
       restrictedUser: [],
       buildingStatus: "",
@@ -260,8 +260,6 @@ function Building() {
 
   // save the area using drawer
   const handleSave = async () => {
-    console.log(formValidation(), validationObj);
-
     if (!formValidation()) return;
 
     const payload = {
@@ -288,12 +286,11 @@ function Building() {
         streatureLift: formData["Stretcher Lift"] || false,
       },
     };
-
     try {
       let response;
       if (!onEditID) {
         response = await BuildingApi.PostBuilding(payload);
-      } else {
+      } else if (onEditID) {
         response = await BuildingApi.UpdateBuilding(onEditID, payload);
       }
 
@@ -312,26 +309,25 @@ function Building() {
 
   // edit property type
   const handleEdit = useCallback(async (data) => {
-    console.log(data);
 
     setFormData({
       // Basic Information
       buildingName: data?.buildingName || "",
-      nameofBuilder: data?.nameOfBuilder || "",
+      nameOfBuilder: data?.nameOfBuilder || "",
       address: data?.address || "",
-      landmark: data?.landMark || "",
+      landMark: data?.landMark || "",
       area: { id: data?.area?._id || "", area: data?.area?.area || "" },
       city: data?.city || "",
       state: data?.state || "",
       pincode: data?.pincode || "",
-      primebuilding: data?.primeBuilding || false,
+      primeBuilding: data?.primeBuilding || false,
       status: data?.status ?? true,
 
       // Other Details
-      year: data?.yearOfBuildingPossession || "",
-      floors: data?.noOfFloor || "",
-      units: data?.noOfUnit || "",
-      lifts: data?.noOfLiftEachBlock || "",
+      yearOfBuildingPossession: data?.yearOfBuildingPossession || 0,
+      noOfFloor: data?.noOfFloor || 0,
+      noOfUnit: data?.noOfUnit || 0,
+      noOfLiftEachBlock: data?.noOfLiftEachBlock || 0,
 
       // Property Settings
       propertyType: data?.propertyType || [],
