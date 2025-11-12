@@ -33,25 +33,17 @@ function MainLayout() {
     { name: "Building", icon: "apartment", link: "/building" },
     { name: "Property", icon: "location_city", link: "/property" },
 
-    // {
-    //   name: "Reports",
-    //   icon: "analytics",
-    //   children: [
-    //     { name: "Sales Report", link: "/reports/sales" },
-    //     { name: "Activity Report", link: "/reports/activity" },
-    //     { name: "Revenue Report", link: "/reports/revenue" },
-    //   ],
-    // },
+   
     {
       name: "Settings",
       icon: "settings",
       children: [
-        { name: "Property plantype", link: "/settings/propertyType" },
-        { name: "Property source", link: "/settings/propertySource" },
-        {
-          name: "Property specific type",
-          link: "/settings/propertySpecificType",
-        },
+        // { name: "Property plantype", link: "/settings/propertyType" },
+        // { name: "Property source", link: "/settings/propertySource" },
+        // {
+        //   name: "Property specific type",
+        //   link: "/settings/propertySpecificType",
+        // },
         {
           name: "Building configuration",
           link: "/settings/buildingconfiguration",
@@ -59,6 +51,10 @@ function MainLayout() {
         {
           name: "Property configuration",
           link: "/settings/propertyconfiguration",
+        },
+        {
+          name: "Enquiry configuration",
+          link: "/settings/enquiryconfiguration",
         },
         { name: "Users", link: "/settings/users" },
       ],

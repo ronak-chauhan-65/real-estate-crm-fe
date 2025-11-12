@@ -48,7 +48,7 @@ function Buildingconfiguration() {
   }, []);
 
   return (
-    <div className="mx-[1rem] lg:mx-[2rem] ">
+    <div className=" ">
       {/* <div className="pb-[1rem]">
         <h3 className="text-[2rem] font-[600]  text-info ">
           Building configuration
@@ -61,7 +61,7 @@ function Buildingconfiguration() {
         <div>buildingconfiguration</div>
       </div> */}
 
-      <div className="flex flex-col gap-[1rem]">
+      <div className="flex flex-col gap-[1rem] ">
         {configOptions.map((item, index) => (
           <BuildingCommonComp
             item={item}

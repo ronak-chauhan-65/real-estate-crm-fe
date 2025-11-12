@@ -5,8 +5,10 @@ import { useCallback, useMemo, useState } from "react";
 import Drawer from "../../components/Drawer/Drawer";
 import BconfigurationDrawerContent from "./BconfigurationDrawerContent";
 import {
+  deleteMasterConfigg,
   getMasterConfigg,
   postMasterConfigg,
+  UpdateMasterConfigg,
 } from "../../components/APICalls/masterConfig";
 import { showToast } from "../../utils/toastUtils";
 
@@ -26,8 +28,6 @@ function Buildingconfiguration({ item, index, onRefresh }) {
   });
 
   const formValidation = () => {
-    console.log(formData, "formData");
-
     const nameError = !formData?.name || formData?.name.length < 2;
     setvalidationObj({ nameError });
 
@@ -47,7 +47,7 @@ function Buildingconfiguration({ item, index, onRefresh }) {
   }, []);
 
   const handleSave = async () => {
-    if (formValidation()) {
+    if (formValidation() && !onEditID) {
       setloader(true);
 
       const response = await postMasterConfigg({
@@ -66,16 +66,49 @@ function Buildingconfiguration({ item, index, onRefresh }) {
         showToast("error", response?.error?.msg);
       }
       setloader(false);
+    } else if (formValidation() && onEditID) {
+      setloader(true);
+
+      const response = await UpdateMasterConfigg(onEditID, {
+        name: formData?.name,
+      });
+
+      if (response.success) {
+        showToast("success", response?.data?.msg);
+        handleCloseDrawer();
+
+        if (typeof onRefresh === "function") {
+          await onRefresh(item.key);
+        }
+      } else {
+        showToast("error", response?.error?.msg);
+      }
+      setloader(false);
     }
   };
 
   const handleEdit = useCallback(async (item) => {
-    console.log(item, "handleEdithandleEdit");
-
     setFormData({ name: item?.name });
     setIsDrawerOpen(true);
-    setonEditID(user?._id);
+    setonEditID(item?._id);
   }, []);
+
+  // delete base on id
+  const handleDelete = useCallback(async (id) => {
+    setloader(true);
+    const response = await deleteMasterConfigg(id);
+
+    if (response.success) {
+      showToast("success", response?.data?.msg);
+      if (typeof onRefresh === "function") {
+        await onRefresh(item.key);
+      }
+    } else {
+      showToast("error", response?.error?.msg);
+    }
+    setloader(false);
+  }, []);
+
   // Drawer Footer
   const drawerFooter = (
     <div className="flex gap-3 w-full">
@@ -86,7 +119,7 @@ function Buildingconfiguration({ item, index, onRefresh }) {
         Close
       </button>
       <button className="btn btn-info text-accent w-1/2" onClick={handleSave}>
-        Save
+        {onEditID ? "Update" : "Save"}
       </button>
     </div>
   );
@@ -101,8 +134,6 @@ function Buildingconfiguration({ item, index, onRefresh }) {
   );
 
   const rows = useMemo(() => {
-    console.log(item);
-
     // If no areas, show "No data"
     if (!item.data || item.data.length === 0) {
       return (
@@ -120,9 +151,10 @@ function Buildingconfiguration({ item, index, onRefresh }) {
         key={val._id || val.id} // use _id if API gives it
         val={val}
         onEdit={handleEdit}
+        onDelete={handleDelete}
       />
     ));
-  }, [item.data, handleEdit]);
+  }, [item.data, handleEdit, handleDelete]);
 
   return (
     <div className="mx-[1rem] lg:mx-[2rem] ">

@@ -1,76 +1,33 @@
-import React, { useEffect, useState } from "react";
-import PropertyCommonComponent from "./PropertyCommonComponent";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import EnquiryCommonComp from "./EnquiryCommonComp";
 import { getMasterConfigg } from "../../components/APICalls/masterConfig";
 
-function Propertyconfiguration() {
+function Enquiryconfiguration() {
   const [configOptions, setConfigOptions] = useState([
     {
-      key: "PROPERTY_CONSTRUCTION_TYPE",
-      title: "Property Construction",
-      data: [],
-    },
-    {
-      key: "PROPERTY_SPECIFIC_TYPE",
-      title: "Property Specific Type",
-      data: [],
-    },
-    {
-      key: "PROPERTY_FOR",
-      title: "Property For",
-      data: [],
-    },
-    {
-      key: "PROPERTY_OWNER_TYPE",
-      title: "Property Owner Type",
-      data: [],
-    },
-    {
-      key: "PROPERTY_FURNITURE_TYPE",
-      title: "Property Furniture Type",
-      data: [],
-    },
-    {
-      key: "PROPERTY_PRIORITY_TYPE",
-      title: "Property Priority Type",
-      data: [],
-    },
-    {
-      key: "PROPERTY_SOURCE",
-      title: "Property Source",
-      data: [],
-    },
-    {
-      key: "PROPERTY_PLAN_TYPE",
-      title: "Property Plan Type",
-      data: [],
-    },
-    {
-      key: "PROPERTY_MEASUREMENT_TYPE",
-      title: "Property Measurement Type",
+      key: "ENQUIRY_SALES_COMMENT",
+      title: "Enquiry Configuration",
       data: [],
     },
   ]);
 
   const params = {
-    key: [
-      "PROPERTY_CONSTRUCTION_TYPE",
-      "PROPERTY_SPECIFIC_TYPE",
-      "PROPERTY_FOR",
-      "PROPERTY_OWNER_TYPE",
-      "PROPERTY_FURNITURE_TYPE",
-      "PROPERTY_PRIORITY_TYPE",
-      "PROPERTY_SOURCE",
-      "PROPERTY_PLAN_TYPE",
-      "PROPERTY_MEASUREMENT_TYPE",
-    ].join(","),
+    key: ["ENQUIRY_SALES_COMMENT"].join(","),
   };
 
   useEffect(() => {
     const fetchData = async () => {
       const resp = await getMasterConfigg(params);
 
+
       const responseData = resp?.data?.data ?? {};
-      // console.log(responseData, "responseData");
+
 
       setConfigOptions((prev) =>
         prev.map((item) => ({
@@ -99,7 +56,7 @@ function Propertyconfiguration() {
 
       <div className="flex flex-col gap-[1rem]">
         {configOptions.map((item, index) => (
-          <PropertyCommonComponent
+          <EnquiryCommonComp
             item={item}
             key={item.key}
             index={index}
@@ -119,4 +76,4 @@ function Propertyconfiguration() {
   );
 }
 
-export default Propertyconfiguration;
+export default Enquiryconfiguration;

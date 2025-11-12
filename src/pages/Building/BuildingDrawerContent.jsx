@@ -7,6 +7,7 @@ import SearchableDropdown from "../../components/Dropdown/SearchableDropdown";
 import { AreaApiList } from "../../components/APICalls/areaApi";
 import { QualityofBuilding } from "../../components/CommonFunctions/QualityofBuilding";
 import { PropertyTypeApiList } from "../../components/APICalls/Configure";
+import { getMasterConfigg } from "../../components/APICalls/masterConfig";
 
 const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
   formData,
@@ -22,6 +23,7 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
 }) {
   const [areas, setAreas] = useState([]);
   const [propertyType, setpropertyType] = useState([]);
+  const [restrictedUser, setrestrictedUser] = useState([]);
   const [searchValue, setsearchValue] = useState("");
   const [initialLoaded, setInitialLoaded] = useState(false);
 
@@ -35,16 +37,28 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
     setAreas(response?.data?.areas || []);
   };
 
+  const params = {
+    key: ["PROPERTY_PLAN_TYPE", "BUILDING_RESTRICTION"].join(","),
+  };
+
   const getPropertyTypes = async () => {
-    const response = await PropertyTypeApiList.getPropertyType();
+    const response = await getMasterConfigg(params);
+    console.log(response, "responseresponse11111");
 
     const formatted =
-      response?.data?.data?.map((pt) => ({
+      response?.data?.data?.PROPERTY_PLAN_TYPE?.map((pt) => ({
         label: pt.name,
         value: pt._id,
       })) || [];
 
+    const restrictedFormat =
+      response?.data?.data?.BUILDING_RESTRICTION?.map((br) => ({
+        label: br.name,
+        value: br._id,
+      })) || [];
+
     setpropertyType(formatted);
+    setrestrictedUser(restrictedFormat);
   };
 
   useEffect(() => {
@@ -179,7 +193,7 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
           name: "restrictedUser",
           label: "Restricted Users",
           placeholder: "Select restricted users",
-          items: PropertyTypes(),
+          items: restrictedUser,
         },
         {
           type: "dropdown",

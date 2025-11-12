@@ -11,6 +11,7 @@ import PropertyType from "../pages/Settings/PropertyType";
 import { Navigate } from "react-router-dom";
 import Buildingconfiguration from "../pages/BuildingConfiguration/Buildingconfiguration";
 import Propertyconfiguration from "../pages/PropertyConfiguration/Propertyconfiguration";
+import Enquiryconfiguration from "../pages/EnquiryConfiguration/Enquiryconfiguration";
 
 export const appRoutes = [
   { path: "/", element: <Navigate to="/dashboard" replace /> },
@@ -44,5 +45,10 @@ export const appRoutes = [
     path: "/settings/propertyconfiguration",
     label: "Property configuration",
     element: <Propertyconfiguration />,
+  },
+  {
+    path: "/settings/enquiryconfiguration",
+    label: "Enquiry configuration",
+    element: <Enquiryconfiguration />,
   },
 ];

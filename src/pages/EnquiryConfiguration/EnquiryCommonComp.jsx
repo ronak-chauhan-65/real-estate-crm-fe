@@ -1,28 +1,31 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import Drawer from "../../components/Drawer/Drawer";
+import useClickOutside from "../../CustomHook/useClickOutside";
 import Table from "../../components/Table/Table";
 import NodataFound from "../../components/NoDataFound/NodataFound";
-import PropertyTableRow from "./PropertyTableRow";
-import PconfigurationDrawerContent from "./PconfigurationDrawerContent";
+import { showToast } from "../../utils/toastUtils";
+import EnquiryTableRow from "./EnquiryTableRow";
+import EconfigurationDrawerContent from "./EconfigurationDrawerContent";
 import {
   deleteMasterConfigg,
   postMasterConfigg,
   UpdateMasterConfigg,
 } from "../../components/APICalls/masterConfig";
-import { showToast } from "../../utils/toastUtils";
 
-function PropertyCommonComponent({ item, index, onRefresh }) {
+function EnquiryCommonComp({ item, index, onRefresh }) {
+  // State Declarations
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [showFilter, setshowFilter] = useState(false);
   const [onEditID, setonEditID] = useState("");
   const [loader, setloader] = useState(false);
   const [refreshDropdown, setRefreshDropdown] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    propertyConstructionType: "",
+    itemCategory: "",
   });
   const [validationObj, setvalidationObj] = useState({
     nameError: false,
-    propertyConstructionType: false,
+    itemCategoryError: false,
   });
 
   const formValidation = useCallback(() => {
@@ -38,15 +41,12 @@ function PropertyCommonComponent({ item, index, onRefresh }) {
     }
 
     // Validate dropdown for specific types only
-    if (
-      item.key === "PROPERTY_SPECIFIC_TYPE" ||
-      item.key === "PROPERTY_PLAN_TYPE"
-    ) {
-      if (!formData.propertyConstructionType) {
-        newValidationObj.propertyConstructionType = true; // error = true
+    if (item.key === "ENQUIRY_SALES_COMMENT") {
+      if (!formData.itemCategory) {
+        newValidationObj.itemCategoryError = true; // error = true
         isValid = false;
       } else {
-        newValidationObj.propertyConstructionType = false;
+        newValidationObj.itemCategoryError = false;
       }
     }
 
@@ -55,18 +55,6 @@ function PropertyCommonComponent({ item, index, onRefresh }) {
     return isValid;
   }, [formData, item.key]);
 
-  // Update drawer  field values
-  const handleChange = useCallback((field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  }, []);
-
-  // close drawer
-  const handleCloseDrawer = () => {
-    setIsDrawerOpen(false);
-    setFormData({ name: "", propertyConstructionType: "" });
-    setvalidationObj({ nameError: false, propertyConstructionType: false });
-  };
-
   const handleSave = async () => {
     if (formValidation() && !onEditID) {
       setloader(true);
@@ -74,7 +62,7 @@ function PropertyCommonComponent({ item, index, onRefresh }) {
       const response = await postMasterConfigg({
         key: item.key,
         name: formData?.name,
-        propertyConstructionType: formData?.propertyConstructionType,
+        itemCategory: formData?.itemCategory,
       });
 
       if (item.key === "PROPERTY_CONSTRUCTION_TYPE") {
@@ -97,7 +85,7 @@ function PropertyCommonComponent({ item, index, onRefresh }) {
 
       const response = await UpdateMasterConfigg(onEditID, {
         name: formData?.name,
-        propertyConstructionType: formData?.propertyConstructionType,
+        itemCategory: formData?.itemCategory,
       });
 
       if (response.success) {
@@ -116,7 +104,7 @@ function PropertyCommonComponent({ item, index, onRefresh }) {
   const handleEdit = useCallback(async (item) => {
     setFormData({
       name: item?.name,
-      propertyConstructionType: item?.propertyConstructionType,
+      itemCategory: item?.itemCategory,
     });
     setIsDrawerOpen(true);
     setonEditID(item?._id);
@@ -126,7 +114,7 @@ function PropertyCommonComponent({ item, index, onRefresh }) {
   const handleDelete = useCallback(async (id) => {
     setloader(true);
     const response = await deleteMasterConfigg(id);
-  
+
     if (response.success) {
       showToast("success", response?.data?.msg);
       if (typeof onRefresh === "function") {
@@ -138,10 +126,32 @@ function PropertyCommonComponent({ item, index, onRefresh }) {
     setloader(false);
   }, []);
 
+  // Update drawer  field values
+  const handleChange = useCallback((field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
+  // close drawer
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+    setFormData({ name: "", itemCategory: "" });
+    setvalidationObj({ nameError: false, itemCategoryError: false });
+  };
+
+  const ref = useRef();
+
+  useClickOutside(ref, () => setshowFilter(false));
+
+  // handle  parameter change for get api
+  const handleApiParams = useCallback((field, value) => {
+    setgetApiParams((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
   // Table Configuration
   const tableHeaderData = useMemo(
     () => [
-      { name: "Name", isSort: false },
+      { name: " Name", isSort: false },
+
       { name: "Action", isSort: false, center: true },
     ],
     []
@@ -160,14 +170,19 @@ function PropertyCommonComponent({ item, index, onRefresh }) {
     }
 
     // Otherwise render area rows
-    return item?.data?.map((val) => (
-      <PropertyTableRow
-        key={val._id || val.id} // use _id if API gives it
-        val={val}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-    ));
+    return item?.data?.map(
+      (val) => (
+        console.log(val, "inloop"),
+        (
+          <EnquiryTableRow
+            key={val._id || val.id} // use _id if API gives it
+            val={val}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        )
+      )
+    );
   }, [item.data, handleEdit, handleDelete]);
 
   // Drawer Footer
@@ -184,7 +199,6 @@ function PropertyCommonComponent({ item, index, onRefresh }) {
       </button>
     </div>
   );
-
   return (
     <div className="mx-[1rem] lg:mx-[2rem] ">
       <div
@@ -216,7 +230,7 @@ function PropertyCommonComponent({ item, index, onRefresh }) {
             onEditID={onEditID}
           >
             {isDrawerOpen && (
-              <PconfigurationDrawerContent
+              <EconfigurationDrawerContent
                 formData={formData}
                 validationObj={validationObj}
                 handleChange={handleChange}
@@ -252,4 +266,4 @@ function PropertyCommonComponent({ item, index, onRefresh }) {
   );
 }
 
-export default PropertyCommonComponent;
+export default EnquiryCommonComp;
