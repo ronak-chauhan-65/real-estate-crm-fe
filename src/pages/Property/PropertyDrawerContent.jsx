@@ -19,6 +19,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
 }) {
   const [areas, setAreas] = useState([]);
   const [propertyType, setPropertyType] = useState([]);
+  const [configuration, setconfiguration] = useState([]);
   const [restrictedUser, setRestrictedUser] = useState([]);
   const [buildingStatus, setBuildingStatus] = useState([]);
   const [searchValue, setSearchValue] = useState("");
@@ -38,6 +39,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
       "BUILDING_ARCHITECTURE_TYPE",
       "BUILDING_RESTRICTION",
       "BUILDING_PROGRESS",
+      "PROPERTY_PLAN_TYPE",
     ].join(","),
   };
 
@@ -62,9 +64,14 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
         value: bs._id,
       })) || [];
 
+    const configurationFormat = response?.data?.data?.PROPERTY_PLAN_TYPE?.map(
+      (cg) => ({ label: cg.name, value: cg._id })
+    );
+
     setPropertyType(formatted);
     setRestrictedUser(restrictedFormat);
     setBuildingStatus(buildingStatusFormat);
+    setconfiguration(configurationFormat);
   };
 
   // --- Effects ---
@@ -151,6 +158,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
           label: "Configuration",
           placeholder: "Select configuration type",
           required: true,
+          items: configuration,
         },
         {
           type: "dropdown",

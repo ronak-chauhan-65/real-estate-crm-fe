@@ -2,6 +2,7 @@ import React, { useCallback, useRef, useState } from "react";
 import Drawer from "../../components/Drawer/Drawer";
 import useClickOutside from "../../CustomHook/useClickOutside";
 import PropertyDrawerContent from "./PropertyDrawerContent";
+import { ProprtyAPI } from "../../components/APICalls/PropertyAPI";
 
 function Property() {
   // State Declarations
@@ -211,7 +212,11 @@ function Property() {
   };
 
   // save the area using drawer
-  const handleSave = async () => {};
+  const handleSave = async () => {
+    const response = await ProprtyAPI?.PostProperty(formData);
+
+    console.log(response, formData, "formdata000000000000000000");
+  };
 
   // Drawer Footer
   const drawerFooter = (
@@ -299,7 +304,6 @@ function Property() {
             onEditID={onEditID}
             widthClass=" lg:w-1/2 w-full   "
           >
-           
             <PropertyDrawerContent
               formData={formData}
               validationObj={validationObj}
