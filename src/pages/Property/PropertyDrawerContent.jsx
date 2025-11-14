@@ -6,6 +6,8 @@ import SearchableDropdown from "../../components/Dropdown/SearchableDropdown";
 import { AreaApiList } from "../../components/APICalls/areaApi";
 import { getMasterConfigg } from "../../components/APICalls/masterConfig";
 import TextareaTag from "../../components/Input/TextareaTag";
+import { BuildingApi } from "../../components/APICalls/BuildingApi";
+import CombinedInputWithDropdown from "../../components/Dropdown/CombinedInputWithDropdown";
 
 const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
   formData,
@@ -18,97 +20,152 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
   setFormData,
 }) {
   const [areas, setAreas] = useState([]);
-  const [propertyType, setPropertyType] = useState([]);
+  const [propertyFor, setPropertyFor] = useState([]);
+  const [propertySpecificType, setpropertySpecificType] = useState([]);
+  const [filteredSpecificType, setfilteredSpecificType] = useState([]);
+  const [propertyConstruction, setpropertyConstruction] = useState([]);
   const [configuration, setconfiguration] = useState([]);
-  const [restrictedUser, setRestrictedUser] = useState([]);
-  const [buildingStatus, setBuildingStatus] = useState([]);
+  const [superBuiltUp, setsuperBuiltUp] = useState([]);
+  const [furnitureType, setFurnitureType] = useState([]);
+  const [ownerType, setOwnerType] = useState([]);
+  const [priority, setPriority] = useState([]);
+  const [propertySource, setPropertySource] = useState([]);
+
+  const [allSpecificTypes, setAllSpecificTypes] = useState([]);
+  const [allConfigurations, setAllConfigurations] = useState([]);
+
   const [searchValue, setSearchValue] = useState("");
+  const [searchBuilding, setSearchBuilding] = useState("");
+
   const [initialLoaded, setInitialLoaded] = useState(false);
+  const [buildingName, setbuildingName] = useState([]);
 
   // --- Fetch area list ---
-  const getArea = async (searchKey = "") => {
-    const response = await AreaApiList.getAllArea({
+
+  const getbuilgingName = async (searchKey = "") => {
+    const response = await BuildingApi.getBuilding({
       status: "active",
-      searchKey,
+      searchKey: searchKey,
     });
-    setAreas(response?.data?.areas || []);
+
+    setbuildingName(response?.data?.buildings);
   };
+
+  useEffect(() => {
+    if (searchBuilding.length >= 3 || searchBuilding == "") {
+      getbuilgingName(searchBuilding);
+    }
+  }, [searchBuilding]);
 
   const params = {
     key: [
-      "BUILDING_ARCHITECTURE_TYPE",
-      "BUILDING_RESTRICTION",
-      "BUILDING_PROGRESS",
+      "PROPERTY_FOR",
       "PROPERTY_PLAN_TYPE",
+      "PROPERTY_SPECIFIC_TYPE",
+      "PROPERTY_CONSTRUCTION_TYPE",
+      "PROPERTY_MEASUREMENT_TYPE",
+      "PROPERTY_FURNITURE_TYPE",
+      "PROPERTY_OWNER_TYPE",
+      "PROPERTY_PRIORITY_TYPE",
+      "PROPERTY_SOURCE",
     ].join(","),
   };
 
   const getPropertyTypes = async () => {
     const response = await getMasterConfigg(params);
 
-    const formatted =
-      response?.data?.data?.BUILDING_ARCHITECTURE_TYPE?.map((pt) => ({
-        label: pt.name,
-        value: pt._id,
-      })) || [];
+    const specificTypeFormat = response?.data?.data?.PROPERTY_SPECIFIC_TYPE;
+    const configurationFormat = response?.data?.data?.PROPERTY_PLAN_TYPE;
 
-    const restrictedFormat =
-      response?.data?.data?.BUILDING_RESTRICTION?.map((br) => ({
-        label: br.name,
-        value: br._id,
-      })) || [];
+    setAllSpecificTypes(specificTypeFormat);
+    setAllConfigurations(configurationFormat);
 
-    const buildingStatusFormat =
-      response?.data?.data?.BUILDING_PROGRESS?.map((bs) => ({
-        label: bs.name,
-        value: bs._id,
-      })) || [];
+    setpropertySpecificType(specificTypeFormat);
+    setconfiguration(configurationFormat);
+    //   ?
+    // .map(
+    //   (cg) => ({ label: cg.name, value: cg._id })
+    // );
 
-    const configurationFormat = response?.data?.data?.PROPERTY_PLAN_TYPE?.map(
-      (cg) => ({ label: cg.name, value: cg._id })
+    const propertyForFormat = response?.data?.data?.PROPERTY_FOR?.map((pf) => ({
+      label: pf.name,
+      value: pf._id,
+    }));
+
+    const propertyConstructionFormat =
+      response?.data?.data?.PROPERTY_CONSTRUCTION_TYPE?.map((pc) => ({
+        label: pc.name,
+        value: pc._id,
+      }));
+
+    const superBuiltUpFormat =
+      response?.data?.data?.PROPERTY_MEASUREMENT_TYPE?.map((sb) => ({
+        label: sb.name,
+        value: sb._id,
+      }));
+
+    const furnitureFormat = response?.data?.data?.PROPERTY_FURNITURE_TYPE?.map(
+      (ft) => ({ label: ft.name, value: ft._id })
     );
 
-    setPropertyType(formatted);
-    setRestrictedUser(restrictedFormat);
-    setBuildingStatus(buildingStatusFormat);
-    setconfiguration(configurationFormat);
-  };
+    const ownerTypeFormat = response?.data?.data?.PROPERTY_OWNER_TYPE?.map(
+      (ot) => ({ label: ot.name, value: ot._id })
+    );
 
-  // --- Effects ---
+    const priorityFormat = response?.data?.data?.PROPERTY_PRIORITY_TYPE?.map(
+      (pt) => ({ label: pt.name, value: pt._id })
+    );
+
+    const propertySourceFormat = response?.data?.data?.PROPERTY_SOURCE?.map(
+      (ps) => ({ label: ps.name, value: ps._id })
+    );
+
+    setPropertyFor(propertyForFormat);
+    setpropertySpecificType(specificTypeFormat);
+    setconfiguration(configurationFormat);
+    setpropertyConstruction(propertyConstructionFormat);
+    setsuperBuiltUp(superBuiltUpFormat);
+    setFurnitureType(furnitureFormat);
+    setOwnerType(ownerTypeFormat);
+    setPriority(priorityFormat);
+    setPropertySource(propertySourceFormat);
+  };
   useEffect(() => {
-    if (!initialLoaded) {
-      getArea("");
-      setInitialLoaded(true);
+    if (!formData.propertyType) {
+      // Show ALL
+      setfilteredSpecificType(
+        allSpecificTypes.map((i) => ({ label: i.name, value: i._id }))
+      );
+
+      setconfiguration(
+        allConfigurations.map((i) => ({ label: i.name, value: i._id }))
+      );
     }
-  }, [initialLoaded]);
+  }, [formData.propertyType, allSpecificTypes, allConfigurations]);
 
   useEffect(() => {
     getPropertyTypes();
   }, []);
 
-  useEffect(() => {
-    if (searchValue.length >= 3 || searchValue === "") {
-      getArea(searchValue);
-    }
-  }, [searchValue]);
-
   const sections = [
     {
       title: "Property Information",
       fields: [
-        {
-          type: "searchdropdown",
-          name: "area", // Ref → Area
-          label: "Area",
-          placeholder: "Search area",
-          required: true,
-          items: areas,
-        },
+        // {
+        //   type: "searchdropdown",
+        //   name: "area", // Ref → Area
+        //   label: "Area",
+        //   placeholder: "Search area",
+        //   required: true,
+        //   items: areas,
+        //   labelKey: "area",
+        // },
         {
           type: "dropdown",
           name: "propertyFor", // Ref → MasterConfig (PROPERTY_FOR)
           label: "Property For",
           placeholder: "Select property purpose",
+          items: propertyFor,
           required: true,
         },
         {
@@ -117,7 +174,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
           label: "Property Type",
           placeholder: "Select property type",
           required: true,
-          items: propertyType,
+          items: propertyConstruction,
         },
         {
           type: "dropdown",
@@ -125,6 +182,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
           label: "Specific Property",
           placeholder: "Select specific property type",
           required: true,
+          items: filteredSpecificType,
         },
         {
           type: "searchdropdown",
@@ -132,7 +190,9 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
           label: "Building Name",
           placeholder: "Search building",
           required: true,
-          items: [],
+          items: buildingName,
+          onSearchChange: setSearchBuilding,
+          labelKey: "buildingName",
         },
         {
           type: "text",
@@ -174,57 +234,42 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
           ],
         },
         {
-          type: "text",
-          name: "carpetArea",
+          type: "combineInputDropdown",
+          name: "carpetAreaBlock",
           label: "Carpet Area",
           placeholder: "Enter carpet area",
-        },
-        {
-          type: "dropdown",
-          name: "carpetMeasurement", // Ref → MasterConfig (PROPERTY_MEASUREMENT_TYPE)
-          label: "Carpet Measurement Unit",
-          placeholder: "Select unit (sqft, sqm, etc.)",
+          inputName: "carpetArea",
+          dropdownName: "carpetMeasurement",
+          items: superBuiltUp,
         },
 
         {
-          type: "text",
-          name: "superBuiltUpArea",
+          type: "combineInputDropdown",
+          name: "superBuiltUpBlock",
           label: "Super Built-up Area (Saleable)",
           placeholder: "Enter super built-up area",
+          inputName: "superBuiltUpArea",
+          dropdownName: "superBuiltUpMeasurement",
+          items: superBuiltUp,
           required: true,
         },
         {
-          type: "dropdown",
-          name: "superBuiltUpMeasurement",
-          label: "Super Built-up Measurement Unit",
-          placeholder: "Select unit (sqft, sqm, etc.)",
-          required: true,
-        },
-        {
-          type: "text",
-          name: "plotArea",
+          type: "combineInputDropdown",
           label: "Plot Area",
           placeholder: "Enter plot area",
+          inputName: "plotArea",
+          dropdownName: "plotMeasurement",
+          items: superBuiltUp,
           required: true,
         },
         {
-          type: "dropdown",
-          name: "plotMeasurement",
-          label: "Plot Measurement Unit",
-          placeholder: "Select unit (sqft, sqm, etc.)",
-          required: true,
-        },
-        {
-          type: "text",
-          name: "terrace",
+          type: "combineInputDropdown",
+          name: "terraceBlock",
           label: "Terrace Area",
           placeholder: "Enter terrace area",
-        },
-        {
-          type: "dropdown",
-          name: "terraceMeasurement",
-          label: "Terrace Measurement Unit",
-          placeholder: "Select unit (sqft, sqm, etc.)",
+          inputName: "terrace",
+          dropdownName: "terraceMeasurement",
+          items: superBuiltUp,
         },
 
         {
@@ -247,6 +292,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
           type: "dropdown",
           name: "furnishedStatus", // Ref → MasterConfig (PROPERTY_FURNITURE_TYPE)
           label: "Furnished Status",
+          items: furnitureType,
           placeholder: "Select furnished status",
         },
         {
@@ -265,6 +311,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
           type: "dropdown",
           name: "priority", // Ref → MasterConfig (PROPERTY_PRIORITY_TYPE)
           label: "Priority",
+          items: priority,
           placeholder: "Select priority level",
         },
 
@@ -279,6 +326,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
           name: "sourceOfProperty",
           label: "Source of Property",
           placeholder: "Select source of property",
+          items: propertySource,
           required: true,
         },
         {
@@ -331,6 +379,46 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
         },
       ],
     },
+    {
+      title: "Property Owner  information",
+      fields: [
+        {
+          type: "dropdown",
+          name: "owner",
+          label: "Property owner is",
+          placeholder: "Select property owner",
+          items: ownerType,
+          required: true,
+        },
+        {
+          type: "text",
+          name: "email",
+          label: "Email",
+          placeholder: "Enter price remarks",
+        },
+
+        {
+          type: "checkbox",
+          name: "nri",
+          label: "NRI",
+          placeholder: "Enter remarks",
+        },
+        {
+          type: "number",
+          name: "ownerContactSpecificNo",
+          label: "Owner contact specific number",
+          placeholder: "Enter number",
+        },
+      ],
+    },
+  ];
+
+  const plotUnits = [
+    { label: "Sq Ft", value: "sqft" },
+    { label: "Sq Yard", value: "sqyard" },
+    { label: "Sq Meter", value: "sqm" },
+    { label: "Acre", value: "acre" },
+    { label: "Hectare", value: "hectare" },
   ];
 
   return (
@@ -338,7 +426,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
       {sections.map((section, sIdx) => (
         <div
           key={sIdx}
-          className="border border-accent rounded-[16px] p-4 bg-base-100 shadow-md"
+          className="border border-accent rounded-[16px] p-4 bg-base-100 shadow-md "
         >
           {section.title && (
             <h3 className="text-lg font-semibold text-info mb-3 border-b border-info pb-3">
@@ -348,7 +436,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {section.fields.map((field, idx) => (
-              <div key={idx} className="relative">
+              <div key={idx} className="relative ">
                 {["text", "number", "email"].includes(field.type) && (
                   <InputTag
                     label={field.label}
@@ -367,7 +455,33 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
                     items={field.items}
                     buttonLabel={formData?.[field.name] || field.placeholder}
                     value={formData?.[field.name]}
-                    onSelect={(item) => handleChange(field.name, item)}
+                    onSelect={(item) => {
+                      // Update propertyType
+                      handleChange(field.name, item);
+
+                      if (field.name === "propertyType") {
+                        // Filter Specific Property Types
+                        const newSpecificTypes = propertySpecificType
+                          .filter(
+                            (v) => v.propertyConstructionType?._id === item
+                          )
+                          .map((i) => ({ label: i.name, value: i._id }));
+
+                        setfilteredSpecificType(newSpecificTypes);
+
+                        // Filter Configuration
+                        const newConfigs = allConfigurations
+                          .filter(
+                            (v) => v.propertyConstructionType?._id === item
+                          )
+                          .map((i) => ({ label: i.name, value: i._id }));
+
+                        setconfiguration(newConfigs);
+
+                        handleChange("specificProperty", "");
+                        handleChange("configuration", "");
+                      }
+                    }}
                     widthClass="w-full"
                   />
                 )}
@@ -381,34 +495,35 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
                       formData?.[field.name]?.area || field.placeholder
                     }
                     value={formData?.[field.name]}
-                    isplaceholder="Search area"
+                    isplaceholder={field.placeholder}
                     onSelect={(selectedItem, rawItem) => {
                       handleChange(field.name, selectedItem);
-                      setFormData((prev) => ({
-                        ...prev,
-                        city: rawItem.city || prev.city,
-                        state: rawItem.state || prev.state,
-                        pincode: rawItem.pincode || prev.pincode,
-                      }));
+
+                      // Only apply area auto-fill for Area dropdown
                     }}
+                    labelKey={field?.labelKey}
                     widthClass="w-full"
                     minCharsToOpen={3}
-                    onSearchChange={setSearchValue}
+                    onSearchChange={
+                      field.name === "area" ? setSearchValue : setSearchBuilding
+                    }
                   />
                 )}
 
                 {field.type === "checkbox" && (
-                  <label className="flex items-center gap-2 mt-2">
-                    <input
-                      type="checkbox"
-                      checked={formData[field.name] || false}
-                      onChange={(e) =>
-                        handleChange(field.name, e.target.checked)
-                      }
-                      className="toggle border-info bg-accent checked:border-info checked:bg-info"
-                    />
-                    <span>{field.label}</span>
-                  </label>
+                  <div className=" w-full h-full flex items-end pb-3">
+                    <label className="flex items-center gap-2 mt-2">
+                      <input
+                        type="checkbox"
+                        checked={formData[field.name] || false}
+                        onChange={(e) =>
+                          handleChange(field.name, e.target.checked)
+                        }
+                        className="toggle border-info bg-accent checked:border-info checked:bg-info"
+                      />
+                      <span>{field.label}</span>
+                    </label>
+                  </div>
                 )}
 
                 {field.type === "textarea" && (
@@ -420,6 +535,23 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
                     required={field.required}
                     disabled={field.disabled}
                     rows={field.rows}
+                  />
+                )}
+
+                {field.type === "combineInputDropdown" && (
+                  <CombinedInputWithDropdown
+                    label={field.label}
+                    required={field.required}
+                    placeholder={field.placeholder}
+                    inputValue={formData[field.inputName]}
+                    dropdownValue={formData[field.dropdownName]}
+                    dropdownItems={field.items}
+                    onInputChange={(value) =>
+                      handleChange(field.inputName, value)
+                    }
+                    onDropdownChange={(value) =>
+                      handleChange(field.dropdownName, value)
+                    }
                   />
                 )}
               </div>

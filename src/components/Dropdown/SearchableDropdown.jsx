@@ -16,6 +16,7 @@ const SearchableDropdown = ({
   minCharsToOpen = 3,
   isplaceholder = "Search...",
   onSearchChange,
+  labelKey = "area",
 }) => {
   const [selectedValue, setSelectedValue] = useState(value?.id || "");
   const [selectedLabel, setSelectedLabel] = useState(value?.area || "");
@@ -27,15 +28,15 @@ const SearchableDropdown = ({
   useEffect(() => {
     if (value) {
       setSelectedValue(value?.id || "");
-      setSelectedLabel(value?.area || "");
+      setSelectedLabel(value?.label || "");
     }
   }, [value]);
 
   // Update label if items change
   useEffect(() => {
     const foundItem = items.find((i) => i._id === selectedValue);
-    if (foundItem) setSelectedLabel(foundItem.area);
-  }, [selectedValue, items]);
+    if (foundItem) setSelectedLabel(foundItem[labelKey]);
+  }, [selectedValue, items, labelKey]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -68,14 +69,12 @@ const SearchableDropdown = ({
   // Handle item selection
   const handleSelect = (item) => {
     setSelectedValue(item._id);
-    setSelectedLabel(item.area);
+    setSelectedLabel(item[labelKey]);
 
-    // ✅ Send both id and name back to parent
-    onSelect?.({ id: item._id, area: item.area }, item);
+    onSelect?.({ id: item._id, label: item[labelKey] }, item);
 
     setIsOpen(false);
   };
-
   return (
     <div className="relative w-full py-[4px]" ref={dropdownRef}>
       {label && (
@@ -124,7 +123,7 @@ const SearchableDropdown = ({
                         : "text-gray-700"
                     }`}
                   >
-                    {item.area}
+                    {item[labelKey]}
                   </a>
                 </li>
               ))

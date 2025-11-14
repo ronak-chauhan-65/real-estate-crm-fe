@@ -20,8 +20,7 @@ const PopoverDropdown = ({
     if (value !== undefined) {
       setSelectedValue(value);
     }
-  }, [value]);
-
+  }, [value, items]);
   const handleSelect = (item) => {
     setSelectedValue(item.value);
     onSelect && onSelect(item.value, item);
@@ -58,21 +57,32 @@ const PopoverDropdown = ({
       <ul
         id={popoverId}
         popover={position}
-        className={`dropdown menu rounded-box bg-base-100 shadow-sm max-h-[200px] absolute ${widthClass} ${className}`}
+        className={`dropdown menu rounded-box bg-base-100 shadow-sm max-h-[200px] overflow-auto absolute ${widthClass} ${className}`}
         style={{ positionAnchor: anchorName }}
       >
-        {items.map((item, idx) => (
-          <li key={idx}>
-            <a
-              onClick={() => handleSelect(item)}
-              className={`cursor-pointer ${
-                selectedValue === item.value ? "font-semibold text-primary" : ""
-              }`}
-            >
-              {item.label}
-            </a>
+        {/* Show No Data Found */}
+        {items.length === 0 && (
+          <li className="text-center py-1 text-gray-400 select-none">
+            No Data Found
           </li>
-        ))}
+        )}
+
+        {/* Otherwise list items */}
+        {items.length > 0 &&
+          items.map((item, idx) => (
+            <li key={idx}>
+              <a
+                onClick={() => handleSelect(item)}
+                className={`cursor-pointer ${
+                  selectedValue === item.value
+                    ? "font-semibold text-primary"
+                    : ""
+                }`}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))}
       </ul>
     </div>
   );

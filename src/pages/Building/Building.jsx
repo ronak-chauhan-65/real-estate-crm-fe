@@ -309,7 +309,6 @@ function Building() {
 
   // edit property type
   const handleEdit = useCallback(async (data) => {
-
     setFormData({
       // Basic Information
       buildingName: data?.buildingName || "",

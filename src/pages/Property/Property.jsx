@@ -14,7 +14,7 @@ function Property() {
 
   const [formData, setFormData] = useState({
     //  Reference Fields
-    area: "", // Ref → Area collection
+
     buildingName: "", // Ref → Building collection
 
     //  Basic Property Info
@@ -213,9 +213,13 @@ function Property() {
 
   // save the area using drawer
   const handleSave = async () => {
-    const response = await ProprtyAPI?.PostProperty(formData);
+    const payload = {
+      ...formData,
+      buildingName: formData?.buildingName?.id || formData?.buildingName || "",
+    };
 
-    console.log(response, formData, "formdata000000000000000000");
+    const response = await ProprtyAPI?.PostProperty(payload);
+  
   };
 
   // Drawer Footer
@@ -304,19 +308,22 @@ function Property() {
             onEditID={onEditID}
             widthClass=" lg:w-1/2 w-full   "
           >
-            <PropertyDrawerContent
-              formData={formData}
-              validationObj={validationObj}
-              handleChange={handleChange}
-              addOwnerContactSection={addOwnerContactSection}
-              removeOwnerContactSection={removeOwnerContactSection}
-              handleOwnerContactChange={handleOwnerContactChange}
-              handleCaretakerChange={handleCaretakerChange}
-              setFormData={setFormData}
-            />
+            {isDrawerOpen && (
+              <PropertyDrawerContent
+                formData={formData}
+                validationObj={validationObj}
+                handleChange={handleChange}
+                addOwnerContactSection={addOwnerContactSection}
+                removeOwnerContactSection={removeOwnerContactSection}
+                handleOwnerContactChange={handleOwnerContactChange}
+                handleCaretakerChange={handleCaretakerChange}
+                setFormData={setFormData}
+              />
+            )}
           </Drawer>
         </div>
       </div>
+      <div></div>
     </div>
   );
 }
