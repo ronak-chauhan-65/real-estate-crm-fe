@@ -24,6 +24,7 @@ export const callApi = async (bodyObj = {}) => {
       headers: {
         "Content-Type": "application/json",
         Authorization: token,
+        "ngrok-skip-browser-warning": "true",
         ...headers,
       },
       data: method !== "GET" ? body : undefined, // for POST, PUT, DELETE

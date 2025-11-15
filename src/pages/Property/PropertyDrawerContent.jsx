@@ -73,6 +73,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
 
   const getPropertyTypes = async () => {
     const response = await getMasterConfigg(params);
+    console.log(response, "responseresponse");
 
     const specificTypeFormat = response?.data?.data?.PROPERTY_SPECIFIC_TYPE;
     const configurationFormat = response?.data?.data?.PROPERTY_PLAN_TYPE;
@@ -134,11 +135,11 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
     if (!formData.propertyType) {
       // Show ALL
       setfilteredSpecificType(
-        allSpecificTypes.map((i) => ({ label: i.name, value: i._id }))
+        allSpecificTypes?.map((i) => ({ label: i.name, value: i._id }))
       );
 
       setconfiguration(
-        allConfigurations.map((i) => ({ label: i.name, value: i._id }))
+        allConfigurations?.map((i) => ({ label: i.name, value: i._id }))
       );
     }
   }, [formData.propertyType, allSpecificTypes, allConfigurations]);

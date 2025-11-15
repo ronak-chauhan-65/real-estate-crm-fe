@@ -3,7 +3,7 @@ import { callApi } from "./callApi";
 export const ProprtyAPI = {
   getProperty: async (data) =>
     await callApi({
-      endpoint: "/building/getAll",
+      endpoint: "/property/getAll",
       method: "POST",
       body: data,
     }),
