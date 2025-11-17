@@ -24,7 +24,7 @@ const TextareaTag = ({
           placeholder={placeholder}
           disabled={disabled}
           rows={rows}
-          className="textarea textarea-bordered w-full"
+          className="textarea textarea-bordered w-full focus:outline-none focus:ring-0"
         />
       </fieldset>
     </div>

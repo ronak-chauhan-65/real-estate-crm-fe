@@ -30,12 +30,12 @@ const CombinedInputDropdown = ({
         <div className="flex gap-2">
           {/* Input */}
           <input
-            type="text"
+            type="number"
             value={inputValue || ""}
             onChange={(e) => onInputChange(e.target.value)}
             placeholder={placeholder}
             disabled={disabled}
-            className="input w-full"
+            className="input w-full focus:outline-none focus:ring-0"
           />
 
           {/* Custom Dropdown */}

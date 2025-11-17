@@ -24,7 +24,7 @@ const InputTag = ({
           onChange={onChange}
           placeholder={placeholder}
           disabled={disabled}
-          className="input w-full"
+          className="input w-full focus:outline-none focus:ring-0"
         />
       </fieldset>
     </div>

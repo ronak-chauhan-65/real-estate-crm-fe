@@ -102,40 +102,178 @@ function Property() {
     //  Status
     activeStatus: true,
   });
-
   const [validationObj, setValidationObj] = useState({
-    //  Property Information
-    areaError: false,
+    // Property Information
     propertyForError: false,
     propertyTypeError: false,
     specificPropertyError: false,
-    statusError: false,
+    buildingNameError: false,
+    configurationError: false,
+
+    // Locality (NEW)
+    addressError: false,
+    wingError: false,
+    unitNoError: false,
+
+    // Combined Input/Dropdown Blocks
     carpetAreaError: false,
     carpetMeasurementError: false,
-    superBuiltupAreaError: false,
-    superBuiltupMeasurementError: false,
+
+    superBuiltUpAreaError: false,
+    superBuiltUpMeasurementError: false,
+
     plotAreaError: false,
     plotMeasurementError: false,
-    terraceAreaError: false,
+
+    terraceError: false,
     terraceMeasurementError: false,
 
-    //  Additional Details
-    furnishedStatusError: false,
-    priorityError: false,
+    // Additional Details
     sourceOfPropertyError: false,
 
     // Pricing and Remarks
-    priceTextError: false,
+    priceError: false,
 
-    //  Owner Information
-    ownerTypeError: false,
-    ownerEmailError: false,
-    ownerContactNumberError: false,
+    furnishedStatusError: false,
 
-    //  Other Contact Information
-    caretakerNameError: false,
-    caretakerContactError: false,
+    // Owner Information
+    ownerError: false,
   });
+
+  const formValidation = () => {
+    // Property Information
+    const propertyForError =
+      !formData?.propertyFor || formData?.propertyFor === "";
+
+    const furnishedStatusError =
+      !formData?.furnishedStatus || formData?.furnishedStatus === "";
+
+    const propertyTypeError =
+      !formData?.propertyType || formData?.propertyType === "";
+
+    const specificPropertyError =
+      !formData?.specificProperty || formData?.specificProperty === "";
+
+    const buildingNameError =
+      !formData?.buildingName || formData?.buildingName.trim().length < 2;
+
+    const configurationError =
+      !formData?.configuration || formData?.configuration === "";
+
+    // NEW — Locality Fields
+    const addressError =
+      !formData?.address || formData?.address.trim().length < 5;
+
+    const wingError = !formData?.wing || formData?.wing.trim().length < 1;
+
+    const unitNoError = !formData?.unitNo || formData?.unitNo.trim().length < 1;
+
+    // Combined Input/Dropdown Blocks
+    const carpetAreaError =
+      formData?.carpetArea === undefined ||
+      formData?.carpetArea === null ||
+      formData?.carpetArea === "" ||
+      isNaN(Number(formData?.carpetArea));
+
+    const carpetMeasurementError =
+      !formData?.carpetMeasurement || formData?.carpetMeasurement === "";
+
+    const superBuiltUpAreaError =
+      formData?.superBuiltUpArea === undefined ||
+      formData?.superBuiltUpArea === null ||
+      formData?.superBuiltUpArea === "" ||
+      isNaN(Number(formData?.superBuiltUpArea));
+
+    const superBuiltUpMeasurementError =
+      !formData?.superBuiltUpMeasurement ||
+      formData?.superBuiltUpMeasurement === "";
+
+    const plotAreaError =
+      formData?.plotArea === undefined ||
+      formData?.plotArea === null ||
+      formData?.plotArea === "" ||
+      isNaN(Number(formData?.plotArea));
+
+    const plotMeasurementError =
+      !formData?.plotMeasurement || formData?.plotMeasurement === "";
+
+    const terraceError =
+      formData?.terrace === undefined ||
+      formData?.terrace === null ||
+      formData?.terrace === "" ||
+      isNaN(Number(formData?.terrace));
+
+    const terraceMeasurementError =
+      !formData?.terraceMeasurement || formData?.terraceMeasurement === "";
+
+    // Additional Details
+    const sourceOfPropertyError =
+      !formData?.sourceOfProperty || formData?.sourceOfProperty === "";
+
+    // Pricing
+    const priceError =
+      formData?.price === undefined ||
+      formData?.price === null ||
+      Number(formData?.price) <= 0;
+
+    // Owner
+    const ownerError = !formData?.owner || formData?.owner.trim().length < 2;
+
+    // Update state
+    setValidationObj({
+      propertyForError,
+      propertyTypeError,
+      specificPropertyError,
+      buildingNameError,
+      configurationError,
+
+      addressError,
+      wingError,
+      unitNoError,
+
+      carpetAreaError,
+      carpetMeasurementError,
+
+      superBuiltUpAreaError,
+      superBuiltUpMeasurementError,
+
+      plotAreaError,
+      plotMeasurementError,
+
+      terraceError,
+      terraceMeasurementError,
+
+      sourceOfPropertyError,
+      priceError,
+      ownerError,
+
+      furnishedStatusError,
+    });
+
+    // Return overall validity
+    return !(
+      propertyForError ||
+      propertyTypeError ||
+      specificPropertyError ||
+      buildingNameError ||
+      configurationError ||
+      addressError ||
+      wingError ||
+      unitNoError ||
+      carpetAreaError ||
+      carpetMeasurementError ||
+      superBuiltUpAreaError ||
+      superBuiltUpMeasurementError ||
+      plotAreaError ||
+      plotMeasurementError ||
+      terraceError ||
+      terraceMeasurementError ||
+      sourceOfPropertyError ||
+      priceError ||
+      ownerError ||
+      furnishedStatusError
+    );
+  };
 
   const [getProperty, setgetProperty] = useState({
     currentPage: 1,
@@ -161,7 +299,6 @@ function Property() {
       status: getApiParams?.status,
       searchKey: getApiParams?.searchKey,
     });
-    console.log(response, "responseresponse");
 
     const data = response?.data;
 
@@ -272,6 +409,9 @@ function Property() {
 
   // save the area using drawer
   const handleSave = async () => {
+    formValidation();
+    console.log(formValidation(), "    formValidation();");
+
     const payload = {
       ...formData,
       buildingName: formData?.buildingName?.id || formData?.buildingName || "",

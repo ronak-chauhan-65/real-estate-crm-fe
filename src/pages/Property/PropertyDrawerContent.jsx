@@ -19,6 +19,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
   removeOwnerContactSection,
   setFormData,
 }) {
+  console.log(validationObj, "validationobjjjj");
   const [areas, setAreas] = useState([]);
   const [propertyFor, setPropertyFor] = useState([]);
   const [propertySpecificType, setpropertySpecificType] = useState([]);
@@ -200,18 +201,21 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
           name: "address",
           label: "Address",
           placeholder: "Enter full address",
+          required: true,
         },
         {
           type: "text",
           name: "wing",
           label: "Wing",
           placeholder: "Enter wing name",
+          required: true,
         },
         {
           type: "text",
           name: "unitNo",
           label: "Unit Number",
           placeholder: "Enter unit number",
+          required: true,
         },
         {
           type: "dropdown",
@@ -226,6 +230,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
           name: "status",
           label: "Status",
           placeholder: "Select status",
+          required: true,
           items: [
             { label: "Active", value: "Active" },
             { label: "Inactive", value: "Inactive" },
@@ -236,17 +241,18 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
         },
         {
           type: "combineInputDropdown",
-          name: "carpetAreaBlock",
+          name: "carpetArea",
           label: "Carpet Area",
           placeholder: "Enter carpet area",
           inputName: "carpetArea",
           dropdownName: "carpetMeasurement",
           items: superBuiltUp,
+          required: true,
         },
 
         {
           type: "combineInputDropdown",
-          name: "superBuiltUpBlock",
+          name: "superBuiltUpArea",
           label: "Super Built-up Area (Saleable)",
           placeholder: "Enter super built-up area",
           inputName: "superBuiltUpArea",
@@ -256,6 +262,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
         },
         {
           type: "combineInputDropdown",
+          name: "plotArea",
           label: "Plot Area",
           placeholder: "Enter plot area",
           inputName: "plotArea",
@@ -295,6 +302,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
           label: "Furnished Status",
           items: furnitureType,
           placeholder: "Select furnished status",
+          required: true,
         },
         {
           type: "text",
@@ -438,16 +446,18 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {section.fields.map((field, idx) => (
               <div key={idx} className="relative ">
-                {["text", "number", "email"].includes(field.type) && (
-                  <InputTag
-                    label={field.label}
-                    placeholder={field.placeholder}
-                    type={field.type}
-                    value={formData?.[field.name] || ""}
-                    onChange={(e) => handleChange(field.name, e.target.value)}
-                    required={field.required}
-                  />
-                )}
+                <div>
+                  {["text", "number", "email"].includes(field.type) && (
+                    <InputTag
+                      label={field.label}
+                      placeholder={field.placeholder}
+                      type={field.type}
+                      value={formData?.[field.name] || ""}
+                      onChange={(e) => handleChange(field.name, e.target.value)}
+                      required={field.required}
+                    />
+                  )}
+                </div>
 
                 {field.type === "dropdown" && (
                   <Dropdown
@@ -555,6 +565,20 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
                     }
                   />
                 )}
+                {console.log(
+                  field.required,
+                  validationObj?.[`${field.name}Error`],
+                  !formData?.[field.name]
+                )}
+                {field.required &&
+                  validationObj?.[`${field.name}Error`] &&
+                  (!formData?.[field.name] ||
+                    (typeof formData[field.name] === "string" &&
+                      formData[field.name].trim() === "")) && (
+                    <p className="text-red-500 text-[12px] absolute bottom-[-17px]">
+                      {field.label} is required
+                    </p>
+                  )}
               </div>
             ))}
           </div>
