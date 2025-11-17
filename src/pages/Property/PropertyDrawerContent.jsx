@@ -8,6 +8,7 @@ import { getMasterConfigg } from "../../components/APICalls/masterConfig";
 import TextareaTag from "../../components/Input/TextareaTag";
 import { BuildingApi } from "../../components/APICalls/BuildingApi";
 import CombinedInputWithDropdown from "../../components/Dropdown/CombinedInputWithDropdown";
+import NumberWithUnitsSelect from "../../components/Input/NumberWithUnitsSelect";
 
 const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
   formData,
@@ -18,9 +19,10 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
   addOwnerContactSection,
   removeOwnerContactSection,
   setFormData,
+  removeUnitdetails,
+  addUnitDetailsSections,
+  handleUnitDetails,
 }) {
-  console.log(validationObj, "validationobjjjj");
-  const [areas, setAreas] = useState([]);
   const [propertyFor, setPropertyFor] = useState([]);
   const [propertySpecificType, setpropertySpecificType] = useState([]);
   const [filteredSpecificType, setfilteredSpecificType] = useState([]);
@@ -48,6 +50,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
       status: "active",
       searchKey: searchKey,
     });
+    console.log(response, "responsebuilinfnd");
 
     setbuildingName(response?.data?.buildings);
   };
@@ -74,7 +77,6 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
 
   const getPropertyTypes = async () => {
     const response = await getMasterConfigg(params);
-    console.log(response, "responseresponse");
 
     const specificTypeFormat = response?.data?.data?.PROPERTY_SPECIFIC_TYPE;
     const configurationFormat = response?.data?.data?.PROPERTY_PLAN_TYPE;
@@ -368,7 +370,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
       title: "Pricing and Remarks",
       fields: [
         {
-          type: "text",
+          type: "NumberwithUnitSelect",
           name: "price",
           label: "Price",
           placeholder: "Enter property price",
@@ -422,13 +424,22 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
     },
   ];
 
-  const plotUnits = [
-    { label: "Sq Ft", value: "sqft" },
-    { label: "Sq Yard", value: "sqyard" },
-    { label: "Sq Meter", value: "sqm" },
-    { label: "Acre", value: "acre" },
-    { label: "Hectare", value: "hectare" },
-  ];
+  useEffect(() => {
+    if (!formData.propertyType) return;
+
+    // Filter Specific Property Types from RAW data
+    const newSpecificTypes = allSpecificTypes
+      .filter((v) => v.propertyConstructionType?._id === formData.propertyType)
+      .map((i) => ({ label: i.name, value: i._id }));
+
+    // Filter Configuration from RAW data
+    const newConfiguration = allConfigurations
+      .filter((v) => v.propertyConstructionType?._id === formData.propertyType)
+      .map((i) => ({ label: i.name, value: i._id }));
+
+    setfilteredSpecificType(newSpecificTypes);
+    setconfiguration(newConfiguration);
+  }, [formData.propertyType, allSpecificTypes, allConfigurations]);
 
   return (
     <div className="flex flex-col gap-10 w-full text-primary mb-[80px]">
@@ -443,9 +454,9 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
             </h3>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
             {section.fields.map((field, idx) => (
-              <div key={idx} className="relative ">
+              <div key={idx} className="relative h-fit ">
                 <div>
                   {["text", "number", "email"].includes(field.type) && (
                     <InputTag
@@ -481,7 +492,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
                         setfilteredSpecificType(newSpecificTypes);
 
                         // Filter Configuration
-                        const newConfigs = allConfigurations
+                        const newConfigs = propertySpecificType
                           .filter(
                             (v) => v.propertyConstructionType?._id === item
                           )
@@ -509,6 +520,13 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
                     isplaceholder={field.placeholder}
                     onSelect={(selectedItem, rawItem) => {
                       handleChange(field.name, selectedItem);
+
+                      if (field.name === "buildingName") {
+                        setFormData((prev) => ({
+                          ...prev,
+                          address: rawItem?.address,
+                        }));
+                      }
 
                       // Only apply area auto-fill for Area dropdown
                     }}
@@ -565,18 +583,29 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
                     }
                   />
                 )}
-                {console.log(
-                  field.required,
-                  validationObj?.[`${field.name}Error`],
-                  !formData?.[field.name]
+                {field.type === "NumberwithUnitSelect" && (
+                  <NumberWithUnitsSelect
+                    label={field.label}
+                    required={field.required}
+                    placeholder={field.placeholder}
+                    value={formData[field.name]}
+                    onChange={(selected) => {
+                      console.log(selected, "pppppppppp");
+                      handleChange(field.name, selected?.display);
+                    }}
+                  />
                 )}
+
                 {field.required &&
                   validationObj?.[`${field.name}Error`] &&
                   (!formData?.[field.name] ||
                     (typeof formData[field.name] === "string" &&
-                      formData[field.name].trim() === "")) && (
+                      formData[field.name].trim().length <
+                        (field.name === "address" ? 5 : 2))) && (
                     <p className="text-red-500 text-[12px] absolute bottom-[-17px]">
-                      {field.label} is required
+                      {field.name === "address"
+                        ? `${field.label} must be at least 5 characters`
+                        : `${field.label} must be at least 2 characters`}
                     </p>
                   )}
               </div>
@@ -604,7 +633,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
         {formData?.ownerContactDetails?.map((owner, index) => (
           <div
             key={index}
-            className="relative border border-base-200 rounded-lg p-4 mb-4"
+            className="relative border border-base-200 rounded-lg "
           >
             {index !== 0 && (
               <button
@@ -627,51 +656,116 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
                 label="Owner Contact Number"
                 placeholder="Enter contact number"
                 type="number"
-                value={owner.number}
+                value={owner.contactNo}
                 onChange={(e) =>
-                  handleOwnerContactChange(index, "number", e.target.value)
+                  handleOwnerContactChange(index, "contactNo", e.target.value)
                 }
               />
               <label className="flex items-center gap-2 mt-2">
                 <input
                   type="checkbox"
-                  checked={owner.isPrimary || false}
+                  checked={owner.status === "Contactable"}
                   onChange={(e) =>
                     handleOwnerContactChange(
                       index,
-                      "isPrimary",
-                      e.target.checked
+                      "status",
+                      e.target.checked ? "Contactable" : "Not Contactable"
                     )
                   }
                   className="toggle border-info bg-accent checked:border-info checked:bg-info"
                 />
-                <span>Primary Owner</span>
+                <span>Status</span>
               </label>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Caretaker Section */}
+      {/* {unnit details } */}
       <div className="border border-accent rounded-[16px] p-4 bg-base-100 shadow-md">
+        <div className="flex justify-between items-center mb-3 border-b border-info pb-3">
+          <h3 className="text-lg font-semibold text-info  w-full">
+            Unit Details
+          </h3>
+          {formData?.unitDetails?.length < 2 && (
+            <button
+              className="btn btn-sm btn-outline btn-info hover:text-accent"
+              onClick={addUnitDetailsSections}
+            >
+              + Add
+            </button>
+          )}
+        </div>
+
+        {formData?.unitDetails?.map((owner, index) => (
+          <div
+            key={index}
+            className="relative border border-base-200 rounded-lg "
+          >
+            {index !== 0 && (
+              <button
+                onClick={() => removeUnitdetails(index)}
+                className="absolute top-2 right-2 text-error hover:text-red-600"
+              >
+                ✕
+              </button>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center ">
+              <div>
+                <InputTag
+                  label="Unit No"
+                  placeholder="Enter unit number"
+                  type="number"
+                  value={owner.unitNo}
+                  onChange={(e) =>
+                    handleUnitDetails(index, "unitNo", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="w-full ">
+                <fieldset className="fieldset">
+                  <legend className="fieldset-legend">Status</legend>
+
+                  <select
+                    className="select w-full focus:outline-none focus:ring-0 select-bordered"
+                    value={owner.status}
+                    onChange={(e) =>
+                      handleUnitDetails(index, "status", e.target.value)
+                    }
+                  >
+                    <option value="">Select Status</option>
+                    <option value="Contactable">Available</option>
+                    <option value="Rent Out">Rent Out</option>
+                    <option value="Sold Out">Sold Out</option>
+                  </select>
+                </fieldset>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Caretaker Section */}
+      <div className="border border-accent rounded-[16px] p-4 bg-base-100 shadow-md  ">
         <h3 className=" text-lg font-semibold text-info mb-3 border-b border-info pb-3 w-full">
           Caretaker / Key Info
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
           <InputTag
             label="Caretaker Name"
             placeholder="Enter caretaker name"
-            value={formData.caretakerName}
+            value={formData.careTakerName}
             onChange={(e) =>
-              handleCaretakerChange("caretakerName", e.target.value)
+              handleCaretakerChange("careTakerName", e.target.value)
             }
           />
           <InputTag
             label="Caretaker Contact"
             placeholder="Enter caretaker number"
-            value={formData.caretakerContact}
+            value={formData.careTakerContactNo}
             onChange={(e) =>
-              handleCaretakerChange("caretakerContact", e.target.value)
+              handleCaretakerChange("careTakerContactNo", e.target.value)
             }
           />
           <InputTag

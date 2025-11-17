@@ -12,6 +12,8 @@ import { ProprtyAPI } from "../../components/APICalls/PropertyAPI";
 import Table from "../../components/Table/Table";
 import PropertyTableRow from "./PropertyTableRow";
 import NodataFound from "../../components/NoDataFound/NodataFound";
+import AmountConverter from "../../components/Input/NumberWithUnitsSelect";
+import { showToast } from "../../utils/toastUtils";
 
 function Property() {
   // State Declarations
@@ -81,7 +83,7 @@ function Property() {
       {
         name: "",
         contactNo: "",
-        status: "Contactable", // Default
+        status: "Not Contactable", // Default
       },
     ],
 
@@ -154,8 +156,7 @@ function Property() {
     const specificPropertyError =
       !formData?.specificProperty || formData?.specificProperty === "";
 
-    const buildingNameError =
-      !formData?.buildingName || formData?.buildingName.trim().length < 2;
+    const buildingNameError = !formData?.buildingName;
 
     const configurationError =
       !formData?.configuration || formData?.configuration === "";
@@ -349,6 +350,26 @@ function Property() {
     });
   };
 
+  const addUnitDetailsSections = () => {
+    setFormData((prev) => {
+      if (prev.unitDetails?.length >= 2) return prev;
+      return {
+        ...prev,
+        unitDetails: [
+          ...(prev.unitDetails || []),
+          { unitNo: "", status: false },
+        ],
+      };
+    });
+  };
+
+  const removeUnitdetails = (index) => {
+    setFormData((prev) => {
+      const updated = prev.unitDetails.filter((_, i) => i !== index);
+      return { ...prev, unitDetails: updated };
+    });
+  };
+
   // Remove Owner Contact Section (except first)
   const removeOwnerContactSection = (index) => {
     setFormData((prev) => {
@@ -363,6 +384,14 @@ function Property() {
       const updated = [...prev.ownerContactDetails];
       updated[index][field] = value;
       return { ...prev, ownerContactDetails: updated };
+    });
+  };
+
+  const handleUnitDetails = (index, field, value) => {
+    setFormData((prev) => {
+      const updated = [...prev.unitDetails];
+      updated[index][field] = value;
+      return { ...prev, unitDetails: updated };
     });
   };
 
@@ -409,76 +438,135 @@ function Property() {
 
   // save the area using drawer
   const handleSave = async () => {
-    formValidation();
-    console.log(formValidation(), "    formValidation();");
-
+    if (!formValidation()) return;
     const payload = {
       ...formData,
       buildingName: formData?.buildingName?.id || formData?.buildingName || "",
+      // price: formData?.price?.value,
     };
+    try {
+      let response;
+      if (!onEditID) {
+        response = await ProprtyAPI?.PostProperty(payload);
+      } else if (onEditID) {
+        response = await ProprtyAPI.UpdateProperty(onEditID, payload);
+      }
 
-    const response = await ProprtyAPI?.PostProperty(payload);
+      if (response?.success) {
+        showToast("success", response?.data?.msg);
+        handleCloseDrawer();
+        setisRefresh((prev) => !prev);
+      } else {
+        showToast("error", response?.error?.msg || "Something went wrong");
+      }
+    } catch (err) {
+      console.error("Error saving building:", err);
+      showToast("error", "Server error while saving building");
+    }
   };
 
-  // edit property type
   const handleEdit = useCallback(async (data) => {
-    // setFormData({
-    //   // Basic Information
-    //   buildingName: data?.buildingName || "",
-    //   nameOfBuilder: data?.nameOfBuilder || "",
-    //   address: data?.address || "",
-    //   landMark: data?.landMark || "",
-    //   area: { id: data?.area?._id || "", area: data?.area?.area || "" },
-    //   city: data?.city || "",
-    //   state: data?.state || "",
-    //   pincode: data?.pincode || "",
-    //   primeBuilding: data?.primeBuilding || false,
-    //   status: data?.status ?? true,
+    const response = await ProprtyAPI.getOnIDdetails(data?._id);
 
-    //   // Other Details
-    //   yearOfBuildingPossession: data?.yearOfBuildingPossession || 0,
-    //   noOfFloor: data?.noOfFloor || 0,
-    //   noOfUnit: data?.noOfUnit || 0,
-    //   noOfLiftEachBlock: data?.noOfLiftEachBlock || 0,
+    const property = response?.data?.property;
 
-    //   // Property Settings
-    //   propertyType: data?.propertyType || [],
-    //   restrictedUser: data?.restrictedUser || [],
-    //   buildingStatus: data?.buildingStatus || "",
-    //   qualityOfBuilding: data?.qualityOfBuilding || "",
+    setFormData({
+      // 🔹 Building Name (object {label, value})
+      buildingName: {
+        _id: property?.buildingName?._id,
+        label: property?.buildingName?.buildingName,
+      },
 
-    //   // Amenities
-    //   "Swimming Pool": data?.amenities?.swimmingPool || false,
-    //   "Club House": data?.amenities?.clubHouse || false,
-    //   "Passenger Lift": data?.amenities?.passengerLift || false,
-    //   Gym: data?.amenities?.gym || false,
-    //   "Garden & Children Play Area": data?.amenities?.gardenPlayArea || false,
-    //   "Central AC": data?.amenities?.centralAC || false,
-    //   "Service Lift": data?.amenities?.serviceLift || false,
-    //   "Stretcher Lift": data?.amenities?.streatureLift || false, // note: spelling in API
+      // 🔹 Top Level Dropdowns
+      propertyFor: property?.propertyFor?._id,
+      propertyType: property?.propertyType?._id,
+      specificProperty: property?.specificProperty?._id,
+      configuration: property?.configuration?._id,
 
-    //   // Contact & Security Details
-    //   contactDetails: data?.contactDetails?.length
-    //     ? data.contactDetails
-    //     : [{ name: "", number: "" }],
-    //   securityDetails: data?.securityDetails?.length
-    //     ? data.securityDetails
-    //     : [{ name: "", number: "" }],
-    // });
+      // 🔹 Basic Details
+      address: property?.address || "",
+      landmark: property?.buildingName?.landMark || "",
+      wing: property?.wing || "",
+      unitNo: property?.unitNo || "",
+      status: property?.status || "Active",
+
+      // 🔹 Area Details
+      carpetArea: property?.carpetArea || "",
+      carpetMeasurement: property?.carpetMeasurement?._id || "",
+      superBuiltUpArea: property?.superBuiltUpArea || "",
+      superBuiltUpMeasurement: property?.superBuiltUpMeasurement?._id || "",
+      plotArea: property?.plotArea || "",
+      plotMeasurement: property?.plotMeasurement?._id || "",
+      terrace: property?.terrace || "",
+      terraceMeasurement: property?.terraceMeasurement?._id || "",
+
+      // 🔹 Flags
+      hotProperty: property?.hotProperty || false,
+      shareToOtherBrokers: property?.shareToOtherBrokers || false,
+
+      // 🔹 Other Dropdowns
+      furnishedStatus: property?.furnishedStatus?._id || "",
+      fourWheelerParking: property?.fourWheelerParking || "",
+      twoWheelerParking: property?.twoWheelerParking || "",
+      priority: property?.priority?._id || "",
+      commission: property?.commission || "",
+      sourceOfProperty: property?.sourceOfProperty?._id || "",
+      reference: property?.reference || "",
+
+      // 🔹 Pre-Leased
+      preLeased: property?.preLeased || false,
+      preLeasedRemarks: property?.preLeasedRemarks || "",
+
+      // 🔹 Price & Remarks
+      price: property?.price || "",
+      priceRemarks: property?.priceRemarks || "",
+      remarks: property?.remarks || "",
+
+      // 🔹 Owner Details
+      owner: property?.owner?._id || "",
+      email: property?.email || "",
+      nri: property?.nri || false,
+      ownerContactSpecificNo: property?.ownerContactSpecificNo || "",
+
+      ownerContactDetails: property?.ownerContactDetails?.length
+        ? property?.ownerContactDetails?.map((i) => ({
+            name: i?.name || "",
+            contactNo: i?.contactNo || "",
+            status: i?.status || "Not Contactable",
+          }))
+        : [{ name: "", contactNo: "", status: "Not Contactable" }],
+
+      // 🔹 Units
+      unitDetails: property?.unitDetails?.length
+        ? property?.unitDetails?.map((u) => ({
+            unitNo: u?.unitNo || "",
+            status: u?.status || "",
+          }))
+        : [{ unitNo: "", status: "" }],
+
+      // 🔹 Caretaker
+      careTakerName: property?.careTakerName || "",
+      careTakerContactNo: property?.careTakerContactNo || "",
+      keyArrangement: property?.keyArrangement || "",
+      keyInOffice: property?.keyInOffice || false,
+
+      activeStatus: property?.activeStatus ?? true,
+    });
 
     setIsDrawerOpen(true);
-    setonEditID(data?._id);
+    setonEditID(property?._id);
   }, []);
 
   // delete base on id
   const handleDelete = useCallback(async (id) => {
-    // const response = await BuildingApi.DeleteBuilding(id);
-    // if (response.success) {
-    //   showToast("success", response?.data?.msg);
-    //   setisRefresh((prev) => !prev);
-    // } else {
-    //   showToast("error", response?.error?.msg);
-    // }
+    const response = await ProprtyAPI.DeleteProperty(id);
+
+    if (response.success) {
+      showToast("success", response?.data?.msg);
+      setisRefresh((prev) => !prev);
+    } else {
+      showToast("error", response?.error?.msg);
+    }
   }, []);
 
   // Table Configuration
@@ -488,8 +576,8 @@ function Property() {
       { name: "Modified On", isSort: false },
       { name: "Property Information", isSort: false },
       { name: "Wing", isSort: false },
-      { name: "Unit No ", isSort: false },
-      { name: "Price", isSort: false },
+      { name: "Unit No ", isSort: false, center: true },
+      { name: "Price", isSort: false, center: true },
       { name: "Contact", isSort: false, center: true },
       { name: "Action", isSort: false, center: true },
     ],
@@ -616,6 +704,9 @@ function Property() {
                 handleOwnerContactChange={handleOwnerContactChange}
                 handleCaretakerChange={handleCaretakerChange}
                 setFormData={setFormData}
+                removeUnitdetails={removeUnitdetails}
+                addUnitDetailsSections={addUnitDetailsSections}
+                handleUnitDetails={handleUnitDetails}
               />
             )}
           </Drawer>
@@ -655,65 +746,3 @@ function Property() {
 }
 
 export default Property;
-
-// wing  requried
-// unit Number  requried
-// configuration  drop down requried
-//  status   drop down requried
-// carper area  text  requried
-// carpet mesurment drop down requried
-//  super buildup (saleble area)  text requried
-// super buildup measurement dropd down   requried
-//  plot area text  requried
-// plot measurment  drop down
-// terrace text
-// teraace measurment drop down
-// Hot property checkbox
-// share to other brokers  checkbox
-//
-
-//  property other details
-
-// furnished status drop down  requried
-// fourwheeler parking  text
-// two wheeler parking  text
-// priority drop down
-//  commision text area
-// source of proerty text
-// if any refrence text
-//
-
-// pre leased checkbox
-// pre leased remarks text
-
-// Propery price and remarks
-
-// price text   requried
-// price remarks text
-// remarks text
-
-// Property owner information
-
-// owner is  dropdown
-// email text
-// nri checkbox
-// specific number check box
-//  owner contact specific number text
-
-// owner contact details  requried
-
-// name text
-// conatact number text
-// status dropdown
-
-// Unit details
-
-// unit number text area
-// status dropdown
-
-//  property other contact information
-
-// care take name text
-//  care take contact number  text
-// key arrangement text
-// key in office checkbox

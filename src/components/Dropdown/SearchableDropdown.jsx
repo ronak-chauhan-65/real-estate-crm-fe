@@ -27,7 +27,7 @@ const SearchableDropdown = ({
   // Sync value from parent (like on edit)
   useEffect(() => {
     if (value) {
-      setSelectedValue(value?.id || "");
+      setSelectedValue(value?._id || "");
       setSelectedLabel(value?.label || "");
     }
   }, [value]);
@@ -71,7 +71,7 @@ const SearchableDropdown = ({
     setSelectedValue(item._id);
     setSelectedLabel(item[labelKey]);
 
-    onSelect?.({ id: item._id, label: item[labelKey] }, item);
+    onSelect?.({ _id: item._id, label: item[labelKey] }, item);
 
     setIsOpen(false);
   };
@@ -119,7 +119,7 @@ const SearchableDropdown = ({
                     onClick={() => handleSelect(item)}
                     className={`block px-4 py-2 rounded-md cursor-pointer text-[14px] hover:bg-info/10 ${
                       selectedValue === item._id
-                        ? "font-semibold text-primary"
+                        ? " bg-primary/20 font-semibold text-primary"
                         : "text-gray-700"
                     }`}
                   >

@@ -1,7 +1,15 @@
-import React from "react";
+import React, { useRef } from "react";
 import Tooltip from "../../components/Tooltip/Tooltip";
+import useClickOutside from "../../CustomHook/useClickOutside";
 
 const PropertyTableRow = React.memo(({ item, onEdit, onDelete }) => {
+  const [menuOpen, setMenuOpen] = React.useState(false);
+
+
+  const ref = useRef();
+
+  useClickOutside(ref, () => setMenuOpen(false));
+
   const formatIndianDate = (dateString) => {
     if (!dateString) return "-";
     const date = new Date(dateString);
@@ -29,7 +37,7 @@ const PropertyTableRow = React.memo(({ item, onEdit, onDelete }) => {
   };
 
   return (
-    <tr className="border-b border-gray-300 h-[110px] align-top hover:bg-black/5">
+    <tr className="border-b border-gray-300 h-[110px] align-top hover:bg-black/5 ">
       {/* --- LEFT SECTION --- */}
       <td className="py-2 px-4 w-[15%] border-l-4 border-green-600 pl-3 ">
         <div className=""></div>
@@ -50,7 +58,7 @@ const PropertyTableRow = React.memo(({ item, onEdit, onDelete }) => {
       </td>
 
       {/* --- DATE WITH GREEN BAR --- */}
-      <td className="py-4 px-2 w-[10%] relative">
+      <td className="py-4 w-[10%] relative">
         <div className="">
           <p className="text-sm font-medium">
             {formatIndianDate(item?.updatedAt)}
@@ -62,7 +70,7 @@ const PropertyTableRow = React.memo(({ item, onEdit, onDelete }) => {
       </td>
 
       {/* --- DETAILS SECTION --- */}
-      <td className="py-2 px-3 w-[25%] ">
+      <td className="py-2  w-[25%] ">
         <p className="font-medium text-gray-800">
           {item?.propertyType?.name || "-"}
         </p>
@@ -75,23 +83,23 @@ const PropertyTableRow = React.memo(({ item, onEdit, onDelete }) => {
         </p>
       </td>
 
-      <td className="py-2 px-3 w-[15%] font-semibold text-gray-900">
+      <td className="py-2 w-[5%] font-semibold text-gray-900">
         {item?.wing || "-"}
       </td>
 
-      <td className="py-2 px-3 w-[15%] font-semibold text-gray-900">
+      <td className="py-2 text-center w-[5%] font-semibold text-gray-900">
         {item?.unitNo || "-"}
       </td>
 
       {/* --- PRICE COLUMN --- */}
-      <td className="py-2 px-3 w-[15%] font-semibold text-gray-900">
+      <td className="py-2 text-center  w-[10%] font-semibold text-gray-900 ">
         ₹ {item?.price}
       </td>
 
       {/* --- OWNER + CALL ICON --- */}
-      <td className="py-2 px-3 w-[15%]">
+      <td className="py-2  w-[15%] w-full   flex flex-col justify-center items-center  gap-2">
         <p className="font-medium text-gray-700">
-          {item?.ownerContactDetails?.name || "-"}
+          {item?.ownerContactDetails[0]?.name || "-"}
         </p>
         <a href={`tel:${item?.contactNo}`} className="cursor-pointer">
           <span className="text-green-600 text-[24px] material-symbols-outlined">
@@ -101,92 +109,75 @@ const PropertyTableRow = React.memo(({ item, onEdit, onDelete }) => {
       </td>
 
       {/* --- ACTION ICONS --- */}
-      <td className="py-2 px-3 w-[10%]">
-        <div
-          className="
-      grid grid-cols-2
-      items-center
-      gap-3
-      flex-wrap
-      md:gap-3
-      sm:gap-2
-      xs:gap-1
-    "
-        >
-          {/* EDIT */}
-          <Tooltip content="Edit">
-            <span
-              onClick={() => onEdit(item)}
-              className="
-          material-symbols-outlined
-          cursor-pointer
-          text-gray-600
-          hover:text-blue-600
-          text-[22px]
-          md:text-[22px]
-          sm:text-[20px]
-          xs:text-[18px]
-        "
-            >
-              edit
-            </span>
-          </Tooltip>
+      <td className="py-2 px-6  w-[10%] relative   " ref={ref}>
+        {/* 3-dot button */}
 
-          {/* SHARE */}
-          <Tooltip content="Share">
-            <span
-              className="
-          material-symbols-outlined
-          cursor-pointer
-          text-gray-600
-          hover:text-blue-600
-          text-[22px]
-          md:text-[22px]
-          sm:text-[20px]
-          xs:text-[18px]
-        "
-            >
-              share
+        <Tooltip content="Actions">
+          <div
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="cursor-pointer p-1 flex items-center inline-block "
+          >
+            <span className="material-symbols-outlined text-[16px] text-gray-700 hover:bg-gray-200 p-2 rounded-full">
+              more_vert
             </span>
-          </Tooltip>
+          </div>
+        </Tooltip>
 
-          {/* NOTES */}
-          <Tooltip content="Notes">
-            <span
-              className="
-          material-symbols-outlined
-          cursor-pointer
-          text-gray-600
-          hover:text-blue-600
-          text-[22px]
-          md:text-[22px]
-          sm:text-[20px]
-          xs:text-[18px]
-        "
-            >
-              list_alt
-            </span>
-          </Tooltip>
+        {/* Dropdown Menu - only visible when menuOpen = true */}
+        {menuOpen && (
+          <ul
+            className="
+        absolute left-[-50%] top-10 
+        bg-white shadow-lg rounded-lg w-[120px] text-[16px]
+        p-2 z-20
+      "
+          >
+            <li>
+              <button
+                onClick={() => {
+                  setMenuOpen(false); // CLOSE MENU
+                  onEdit(item); // OPEN DRAWER
+                }}
+                className="flex gap-2 items-center w-full hover:bg-gray-100 p-1 rounded text-[14px] text-info"
+              >
+                <span className="material-symbols-outlined text-[14px]">
+                  edit
+                </span>
+                Edit
+              </button>
+            </li>
 
-          {/* DELETE */}
-          <Tooltip content="Delete">
-            <span
-              onClick={() => onDelete(item._id)}
-              className="
-          material-symbols-outlined
-          cursor-pointer
-          text-red-600
-          hover:text-red-700
-          text-[22px]
-          md:text-[22px]
-          sm:text-[20px]
-          xs:text-[18px]
-        "
-            >
-              delete
-            </span>
-          </Tooltip>
-        </div>
+            <li>
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  // Share logic
+                }}
+                className="flex gap-2 items-center w-full hover:bg-gray-100 p-1 rounded text-[14px] text-info"
+              >
+                <span className="material-symbols-outlined text-[14px]">
+                  share
+                </span>
+                Share
+              </button>
+            </li>
+
+            <li>
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  onDelete(item._id);
+                }}
+                className="flex gap-2 items-center w-full hover:bg-gray-100 p-1 text-[14px] rounded text-info"
+              >
+                <span className="material-symbols-outlined text-[14px]">
+                  delete
+                </span>
+                Delete
+              </button>
+            </li>
+          </ul>
+        )}
       </td>
     </tr>
   );

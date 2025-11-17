@@ -15,15 +15,22 @@ export const ProprtyAPI = {
     }),
   DeleteProperty: async (id) =>
     await callApi({
-      endpoint: `/building`,
+      endpoint: `/property`,
       method: "DELETE",
       id: id,
     }),
   UpdateProperty: async (id, data) =>
     await callApi({
-      endpoint: `/building`,
+      endpoint: `/property`,
       method: "PATCH",
       id, // goes in URL → /config/property-plan-type/:id
       body: data, // the updated fields
+    }),
+
+  getOnIDdetails: async (id) =>
+    await callApi({
+      endpoint: "/property",
+      method: "GET",
+      id: id,
     }),
 };

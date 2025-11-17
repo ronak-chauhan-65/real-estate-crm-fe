@@ -13,10 +13,12 @@ const Table = React.memo(
     scrollToTop = true,
     noDataFound = false,
     onSort = () => {},
-    onPageChange = () => {}, // ✅ add new prop
-    onPerPageChange = () => {}, // ✅ optional if you want to handle per-page outside
+    onPageChange = () => {}, //  add new prop
+    onPerPageChange = () => {}, //  optional if you want to handle per-page outside
     children,
   }) => {
+
+
     const [page, setPage] = useState(currentPage);
     const [rowsPerPage, setRowsPerPage] = useState(perPage);
     const [sortingDirection, setSortingDirection] = useState(
@@ -32,14 +34,14 @@ const Table = React.memo(
       setRowsPerPage(perPage);
     }, [perPage]);
 
-    // ✅ call parent when page changes
+    //  call parent when page changes
     useEffect(() => {
       if (page !== currentPage) {
         onPageChange(page);
       }
     }, [page]);
 
-    // ✅ call parent when rowsPerPage changes
+    //  call parent when rowsPerPage changes
     useEffect(() => {
       onPerPageChange(rowsPerPage);
     }, [rowsPerPage]);
@@ -82,12 +84,12 @@ const Table = React.memo(
           style={{ display: "table" }}
         >
           {/* Table Header */}
-          <thead id="review-table-mnv " className="border-b h-[80px] ">
+          <thead id="review-table-mnv " className="border-b h-[80px]  ">
             <tr>
               {tableHeaderData.map((val, ind) => (
                 <th
                   key={ind}
-                  className={`py-[1.5rem] text-left    ${
+                  className={`py-[1.5rem]  ${
                     ind === 0
                       ? "px-[2rem]"
                       : ind === tableHeaderData.length - 1
@@ -95,7 +97,7 @@ const Table = React.memo(
                       : ""
                   } ${val?.stickyleft ? "sticky left-0 bg-accent" : ""} ${
                     val?.stickyRight ? "sticky right-0 bg-accent" : ""
-                  } ${val?.center ? "text-center" : ""}`}
+                  } ${val?.center ? "text-center" : "text-left"}`}
                 >
                   {val.isSort ? (
                     <div

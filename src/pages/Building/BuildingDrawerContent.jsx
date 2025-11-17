@@ -306,16 +306,16 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
                         items={field.items}
                         buttonLabel={
                           formData?.[field.name]?.area || field.placeholder
-                        } // ✅ show area name
-                        value={formData?.[field.name]} // ✅ expects { id, area }
+                        } //  show area name
+                        value={formData?.[field.name]} //  expects { id, area }
                         isplaceholder="Search area"
                         onSelect={(selectedItem, rawItem) => {
-                          // ✅ 'selectedItem' is { id, area }
-                          // ✅ 'rawItem' is the full API item (has city, state, pincode)
+                          //  'selectedItem' is { id, area }
+                          // 'rawItem' is the full API item (has city, state, pincode)
 
-                          handleChange(field.name, selectedItem); // ✅ store { id, area } in formData
+                          handleChange(field.name, selectedItem); //  store { id, area } in formData
 
-                          // ✅ auto-fill related fields
+                          //  auto-fill related fields
                           setFormData((prev) => ({
                             ...prev,
                             city: rawItem.city || prev.city,
@@ -325,7 +325,7 @@ const BuildingDrawerContent = React.memo(function BuildingDrawerContent({
                         }}
                         widthClass="w-full"
                         minCharsToOpen={3}
-                        onSearchChange={setsearchValue} // ✅ triggers API search
+                        onSearchChange={setsearchValue} //  triggers API search
                       />
                       {field.required &&
                         validationObj?.areaError &&
