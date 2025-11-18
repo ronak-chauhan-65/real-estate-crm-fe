@@ -1,17 +1,19 @@
 import { useState } from "react";
-import { useAuth } from "../components/AuthProvider/AuthProvider";
 import { useNavigate } from "react-router-dom";
+import { authApi } from "../components/APICalls/authApi";
+import { useDispatch } from "react-redux";
+import { login } from "../redux/authSlice";
 
 function Login() {
-  const { login } = useAuth();
   const [formData, setFormData] = useState({ identifier: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const dispatch = useDispatch();
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log(name, "name");
 
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -22,8 +24,21 @@ function Login() {
     setLoading(true);
 
     try {
-      await login(formData);
-      console.log("✅ Logged in and masterConfig fetched!");
+      // await login(formData);
+      const res = await authApi.createAuth(formData);
+      console.log(res, "res");
+
+      // if (!res.success) throw new Error(res?.message || "Login failed");
+
+      // const authToken = res?.data?.token;
+      // localStorage.setItem("token", `Bearer ${authToken}`);
+
+      await dispatch(
+        login({
+          token: res.data.token,
+          user: res.data.user, // {name, email, role, ...}
+        })
+      );
 
       navigate("/dashboard");
       // redirect to dashboard (e.g. useNavigate('/dashboard'))

@@ -99,6 +99,7 @@ function Building() {
       { name: "Adress", isSort: false },
       { name: "Name of builder", isSort: false },
       { name: "Property Type", isSort: false },
+      { name: "createdAt", isSort: false },
       { name: "Action", isSort: false, center: true },
     ],
     []

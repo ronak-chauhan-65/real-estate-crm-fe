@@ -3,6 +3,7 @@ import useClickOutside from "../CustomHook/useClickOutside";
 import UserProfile from "../pages/UserProfile";
 import Drawer from "./Drawer/Drawer";
 import UserLogs from "./UserLogs/UserLogs";
+import { useSelector } from "react-redux";
 
 function Header({ sideExpand, onToggleSidebar }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,13 +16,15 @@ function Header({ sideExpand, onToggleSidebar }) {
     setOpenDrawer(false);
   };
 
+  const usedata = useSelector((state) => state);
+
   const setTheme = (themeName) => {
     document.querySelector("html").setAttribute("data-theme", themeName);
   };
 
   return (
     <nav
-      className={` bg-accent border-b border-gray-200 p-3 flex items-center justify-end  `}
+      className={` bg-accent border-b border-gray-200 p-3 flex items-center md:justify-end  sm:justify-end  xs:justify-end justify-end    w-[100%]`}
     >
       <div className="flex items-center gap-2">
         <div className="flex items-center hover:bg-gray-200 rounded-full p-2">
@@ -53,7 +56,10 @@ function Header({ sideExpand, onToggleSidebar }) {
           )}
         </div>
 
-        <UserProfile fullName="Yagnesh Shiroya" userType="Admin" />
+        <UserProfile
+          fullName={usedata?.auth?.user?.name}
+          userType={usedata?.auth?.user?.role}
+        />
       </div>
       <div className="">
         {OpenDrawer && (

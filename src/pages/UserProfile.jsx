@@ -1,8 +1,11 @@
-import React, { useRef } from "react";
+import React, { useState } from "react";
 import PopupModal from "../components/PopupModal";
+import { useNavigate } from "react-router-dom";
 
-function UserProfile({ fullName = "", userType = "", openPopup }) {
-  const modalRef = useRef();
+function UserProfile({ fullName = "", userType = "" }) {
+  const [openModal, setOpenModal] = useState(false);
+  const navigate = useNavigate();
+
   const getInitial = () => {
     if (!fullName) return "NA";
     return fullName
@@ -14,34 +17,40 @@ function UserProfile({ fullName = "", userType = "", openPopup }) {
   };
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      title="Logout"
-      className="cursor-pointer flex gap-[0.5rem] items-center"
-      onClick={() => modalRef.current?.open()}
-      onKeyPress={(e) => e.key === "Enter" && modalRef.current?.open()}
-    >
-      {/* Avatar circle */}
-      <div className="w-[2.2975rem] h-[2.2975rem] flex items-center justify-center bg-primary text-accent rounded-full">
-        <h5 className="text-accent font-[500]">{getInitial()}</h5>
+    <>
+      <div
+        role="button"
+        tabIndex={0}
+        title="Logout"
+        className="cursor-pointer flex gap-[0.5rem] items-center"
+        onClick={() => setOpenModal(true)}
+      >
+        <div className="w-[2.2975rem] h-[2.2975rem] flex items-center justify-center bg-primary text-accent rounded-full">
+          <h5 className="text-accent font-[500]">{getInitial()}</h5>
+        </div>
+
+        <div className="hidden lg:block">
+          <h5 className="!text-[1rem] !font-[600]">{fullName || "MNV"}</h5>
+          <h6 className="!text-[0.875rem] text-primary/50 !font-[400]">
+            {userType}
+          </h6>
+        </div>
       </div>
 
-      {/* Name & user type */}
-      <div className="hidden lg:block">
-        <h5 className="!text-[1rem] !font-[600]">{fullName || "MNV"}</h5>
-        <h6 className="!text-[0.875rem] text-primary/50 !font-[400]">
-          {userType}
-        </h6>
-      </div>
       <PopupModal
-        ref={modalRef}
-        title="Hello!"
-        subtitle="This action cannot be undone. Are you sure you want to logout ?"
-      >
-        Are you sure want to logout?
-      </PopupModal>
-    </div>
+        isOpen={openModal}
+        title="Delete Product"
+        message="Are you sure you want to delete this product from your account?"
+        onYes={() => {
+          localStorage.removeItem("token");
+          navigate("/login");
+          setOpenModal(false);
+        }}
+        onNo={() => {
+          setOpenModal(false);
+        }}
+      />
+    </>
   );
 }
 

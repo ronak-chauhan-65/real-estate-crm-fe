@@ -2,9 +2,8 @@ import React, { useRef } from "react";
 import Tooltip from "../../components/Tooltip/Tooltip";
 import useClickOutside from "../../CustomHook/useClickOutside";
 
-const PropertyTableRow = React.memo(({ item, onEdit, onDelete }) => {
+const PropertyTableRow = React.memo(({ item, onEdit, onDelete, oninfo }) => {
   const [menuOpen, setMenuOpen] = React.useState(false);
-
 
   const ref = useRef();
 
@@ -135,30 +134,29 @@ const PropertyTableRow = React.memo(({ item, onEdit, onDelete }) => {
             <li>
               <button
                 onClick={() => {
+                  setMenuOpen(false);
+                  oninfo(item._id);
+                }}
+                className="flex gap-2 items-center w-full hover:bg-gray-100 p-1 text-[14px] rounded text-info"
+              >
+                <span className="material-symbols-outlined !text-[20px]">
+                  info
+                </span>
+                Info
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => {
                   setMenuOpen(false); // CLOSE MENU
                   onEdit(item); // OPEN DRAWER
                 }}
                 className="flex gap-2 items-center w-full hover:bg-gray-100 p-1 rounded text-[14px] text-info"
               >
-                <span className="material-symbols-outlined text-[14px]">
+                <span className="material-symbols-outlined !text-[20px]">
                   edit
                 </span>
                 Edit
-              </button>
-            </li>
-
-            <li>
-              <button
-                onClick={() => {
-                  setMenuOpen(false);
-                  // Share logic
-                }}
-                className="flex gap-2 items-center w-full hover:bg-gray-100 p-1 rounded text-[14px] text-info"
-              >
-                <span className="material-symbols-outlined text-[14px]">
-                  share
-                </span>
-                Share
               </button>
             </li>
 
@@ -170,10 +168,25 @@ const PropertyTableRow = React.memo(({ item, onEdit, onDelete }) => {
                 }}
                 className="flex gap-2 items-center w-full hover:bg-gray-100 p-1 text-[14px] rounded text-info"
               >
-                <span className="material-symbols-outlined text-[14px]">
+                <span className="material-symbols-outlined !text-[20px]">
                   delete
                 </span>
                 Delete
+              </button>
+            </li>
+
+            <li>
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  // Share logic
+                }}
+                className="flex gap-2 items-center w-full hover:bg-gray-100 p-1 rounded text-[14px] text-info"
+              >
+                <span className="material-symbols-outlined !text-[20px]">
+                  share
+                </span>
+                Share
               </button>
             </li>
           </ul>

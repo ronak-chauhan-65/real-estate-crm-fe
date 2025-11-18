@@ -1,42 +1,58 @@
-import React, { forwardRef, useImperativeHandle, useRef } from "react";
+import React from "react";
 
-const PopupModal = forwardRef(({ title, children, subtitle }, ref) => {
-  const dialogRef = useRef(null);
-
-  // Expose open and close functions to parent
-  useImperativeHandle(ref, () => ({
-    open: () => dialogRef.current?.showModal(),
-    close: () => dialogRef.current?.close(),
-  }));
+function PopupModal({ isOpen, title, message, onYes, onNo }) {
+  if (!isOpen) return null;
 
   return (
-    <dialog ref={dialogRef} className="modal modal-bottom sm:modal-middle ">
-      <form method="dialog" className="modal-box  ">
-        {title && (
-          <div className="flex justify-center">
-            <h3 className="font-bold    h-[100px] w-[100px] rounded-full  flex items-center justify-center  bg-info/10">
-              <span className="material-symbols-outlined !text-[50px] text-info ">
-                logout
-              </span>
-            </h3>
-          </div>
-        )}
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center ">
+      <div className="bg-white rounded-base p-6 w-full max-w-md shadow-xl relative rounded-[20px] ">
+        {/* Close Button */}
+        <button
+          type="button"
+          onClick={onNo}
+          className="absolute top-3 right-3 text-gray-600 hover:text-black"
+        >
+          ✕
+        </button>
 
-        <div className="py-4 text-[1.5rem] flex justify-center mt-[1rem] ">
-          {children}
+        {/* Icon */}
+        <div className="flex justify-center">
+          <h3 className="font-bold h-[100px] w-[100px] rounded-full flex items-center justify-center bg-info/10">
+            <span className="material-symbols-outlined !text-[50px] text-info">
+              info
+            </span>
+          </h3>
         </div>
-        <div className="text-[1rem] text-center mb-[1.5rem]">{subtitle}</div>
 
-        <div className=" grid grid-cols-2 gap-4">
-          {/* This button will automatically close the modal */}
-          <button className="btn btn-block w-full ">No</button>
-          <button className="btn btn-block w-full bg-error text-accent hover:bg-error ">
+        {/* Title */}
+        <div className="py-4 text-[1.5rem] font-semibold mt-4 text-center">
+          {title}
+        </div>
+
+        {/* Message */}
+        <div className="text-[1rem] text-center text-gray-700 mb-6">
+          {message}
+        </div>
+
+        {/* Buttons */}
+        <div className="grid grid-cols-2 gap-4">
+          <button
+            onClick={onNo}
+            className="btn btn-block w-full rounded-[10px]"
+          >
+            No
+          </button>
+
+          <button
+            onClick={onYes}
+            className="btn btn-block w-full bg-error text-white hover:bg-error  rounded-[10px]"
+          >
             Yes
           </button>
         </div>
-      </form>
-    </dialog>
+      </div>
+    </div>
   );
-});
+}
 
 export default PopupModal;

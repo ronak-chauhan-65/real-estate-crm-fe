@@ -14,6 +14,7 @@ import PropertyTableRow from "./PropertyTableRow";
 import NodataFound from "../../components/NoDataFound/NodataFound";
 import AmountConverter from "../../components/Input/NumberWithUnitsSelect";
 import { showToast } from "../../utils/toastUtils";
+import PropertyInfoDrawer from "./PropertyInfoDrawer";
 
 function Property() {
   // State Declarations
@@ -22,6 +23,8 @@ function Property() {
   const [isRefresh, setisRefresh] = useState(false);
   const [showFilter, setshowFilter] = useState(false);
   const [loader, setloader] = useState(false);
+  const [isInfoDrawerOpen, setIsInfoDrawerOpen] = useState(false);
+  const [propertiesInfo, setpropertiesInfo] = useState({});
 
   const [formData, setFormData] = useState({
     //  Reference Fields
@@ -422,18 +425,87 @@ function Property() {
     handleApiParams("searchKey", value);
   };
 
-  // close drawer
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
     setonEditID("");
-    // setFormData({ pincode: "", area: "", city: "", state: "", status: true });
-    // setvalidationObj({
-    //   pincodeError: false,
-    //   areaError: false,
-    //   cityError: false,
-    //   stateError: false,
-    //   statusError: false,
-    // });
+    setFormData({
+      buildingName: "",
+      propertyFor: "",
+      propertyType: "",
+      specificProperty: "",
+      configuration: "",
+      address: "",
+      landmark: "",
+      wing: "",
+      unitNo: "",
+      status: "Active",
+      carpetArea: "",
+      carpetMeasurement: "",
+      superBuiltUpArea: "",
+      superBuiltUpMeasurement: "",
+      plotArea: "",
+      plotMeasurement: "",
+      terrace: "",
+      terraceMeasurement: "",
+      hotProperty: false,
+      shareToOtherBrokers: false,
+      furnishedStatus: "",
+      fourWheelerParking: "",
+      twoWheelerParking: "",
+      priority: "",
+      commission: "",
+      sourceOfProperty: "",
+      reference: "",
+      preLeased: false,
+      preLeasedRemarks: "",
+      price: "",
+      priceRemarks: "",
+      remarks: "",
+      owner: "",
+      email: "",
+      nri: false,
+      ownerContactSpecificNo: "",
+      ownerContactDetails: [
+        {
+          name: "",
+          contactNo: "",
+          status: "Not Contactable", // Default
+        },
+      ],
+      unitDetails: [
+        {
+          unitNo: "",
+          status: "",
+        },
+      ],
+      careTakerName: "",
+      careTakerContactNo: "",
+      keyArrangement: "",
+      keyInOffice: false,
+      activeStatus: true,
+    });
+    setValidationObj({
+      propertyForError: false,
+      propertyTypeError: false,
+      specificPropertyError: false,
+      buildingNameError: false,
+      configurationError: false,
+      addressError: false,
+      wingError: false,
+      unitNoError: false,
+      carpetAreaError: false,
+      carpetMeasurementError: false,
+      superBuiltUpAreaError: false,
+      superBuiltUpMeasurementError: false,
+      plotAreaError: false,
+      plotMeasurementError: false,
+      terraceError: false,
+      terraceMeasurementError: false,
+      sourceOfPropertyError: false,
+      priceError: false,
+      furnishedStatusError: false,
+      ownerError: false,
+    });
   };
 
   // save the area using drawer
@@ -557,6 +629,149 @@ function Property() {
     setonEditID(property?._id);
   }, []);
 
+  const handleInfo = useCallback(async (data) => {
+    const response = await ProprtyAPI.getOnIDdetails(data);
+
+    const property = response?.data?.property;
+
+    console.log(property, "dataaaaaa");
+
+    setpropertiesInfo({
+      // Building Name
+      buildingName: {
+        _id: property?.buildingName?._id,
+        label: property?.buildingName?.buildingName,
+      },
+
+      // Top Level Dropdowns (store both id + title)
+      propertyFor: {
+        _id: property?.propertyFor?._id,
+        name: property?.propertyFor?.name,
+      },
+
+      propertyType: {
+        _id: property?.propertyType?._id,
+        name: property?.propertyType?.name,
+      },
+
+      specificProperty: {
+        _id: property?.specificProperty?._id,
+        name: property?.specificProperty?.name,
+      },
+
+      configuration: {
+        _id: property?.configuration?._id,
+        name: property?.configuration?.name,
+      },
+
+      // Basic Details
+      address: property?.address || "",
+      landmark: property?.buildingName?.area?.area || "",
+      wing: property?.wing || "",
+      unitNo: property?.unitNo || "",
+      status: property?.status || "Active",
+
+      // Area Details (ID + name)
+      carpetArea: property?.carpetArea || "",
+      carpetMeasurement: {
+        _id: property?.carpetMeasurement?._id,
+        name: property?.carpetMeasurement?.name,
+      },
+
+      superBuiltUpArea: property?.superBuiltUpArea || "",
+      superBuiltUpMeasurement: {
+        _id: property?.superBuiltUpMeasurement?._id,
+        name: property?.superBuiltUpMeasurement?.name,
+      },
+
+      plotArea: property?.plotArea || "",
+      plotMeasurement: {
+        _id: property?.plotMeasurement?._id,
+        name: property?.plotMeasurement?.name,
+      },
+
+      terrace: property?.terrace || "",
+      terraceMeasurement: {
+        _id: property?.terraceMeasurement?._id,
+        name: property?.terraceMeasurement?.name,
+      },
+
+      // Flags
+      hotProperty: property?.hotProperty || false,
+      shareToOtherBrokers: property?.shareToOtherBrokers || false,
+
+      // Furnished, Priority, Parking, etc.
+      furnishedStatus: {
+        _id: property?.furnishedStatus?._id,
+        name: property?.furnishedStatus?.name,
+      },
+
+      fourWheelerParking: property?.fourWheelerParking || "",
+      twoWheelerParking: property?.twoWheelerParking || "",
+
+      priority: {
+        _id: property?.priority?._id,
+        name: property?.priority?.name,
+      },
+
+      commission: property?.commission || "",
+
+      sourceOfProperty: {
+        _id: property?.sourceOfProperty?._id,
+        name: property?.sourceOfProperty?.name,
+      },
+
+      reference: property?.reference || "",
+
+      // Pre-Leased
+      preLeased: property?.preLeased || false,
+      preLeasedRemarks: property?.preLeasedRemarks || "",
+
+      // Price
+      price: property?.price || "",
+      priceRemarks: property?.priceRemarks || "",
+      remarks: property?.remarks || "",
+
+      // Owner Details
+      owner: {
+        _id: property?.owner?._id,
+        name: property?.owner?.name,
+      },
+
+      email: property?.email || "",
+      nri: property?.nri || false,
+      ownerContactSpecificNo: property?.ownerContactSpecificNo || "",
+
+      ownerContactDetails: property?.ownerContactDetails?.length
+        ? property?.ownerContactDetails?.map((i) => ({
+            name: i?.name || "",
+            contactNo: i?.contactNo || "",
+            status: i?.status || "Contactable",
+          }))
+        : [{ name: "", contactNo: "", status: "Contactable" }],
+
+      // Units
+      unitDetails: property?.unitDetails?.length
+        ? property?.unitDetails?.map((u) => ({
+            unitNo: u?.unitNo || "",
+            status: u?.status || "",
+          }))
+        : [{ unitNo: "", status: "" }],
+
+      // Caretaker
+      careTakerName: property?.careTakerName || "",
+      careTakerContactNo: property?.careTakerContactNo || "",
+      keyArrangement: property?.keyArrangement || "",
+      keyInOffice: property?.keyInOffice || false,
+
+      activeStatus: property?.activeStatus ?? true,
+    });
+
+    setIsInfoDrawerOpen(true);
+
+    setonEditID(property?._id);
+  }, []);
+
   // delete base on id
   const handleDelete = useCallback(async (id) => {
     const response = await ProprtyAPI.DeleteProperty(id);
@@ -603,6 +818,7 @@ function Property() {
         key={item._id || item.id} // use _id if API gives it
         item={item}
         onEdit={handleEdit}
+        oninfo={handleInfo}
         onDelete={handleDelete}
       />
     ));
@@ -618,7 +834,7 @@ function Property() {
         Close
       </button>
       <button className="btn btn-info text-accent w-1/2" onClick={handleSave}>
-        Save
+        {onEditID ? "Update" : "Save"}
       </button>
     </div>
   );
@@ -682,7 +898,7 @@ function Property() {
             className="btn btn-info text-accent rounded-[15px]"
             onClick={() => setIsDrawerOpen(true)}
           >
-            <span className="material-symbols-outlined">add</span> Add Area
+            <span className="material-symbols-outlined">add</span> Add Property
           </button>
 
           <Drawer
@@ -738,6 +954,19 @@ function Property() {
             >
               {rows}
             </Table>
+            <Drawer
+              isOpen={isInfoDrawerOpen}
+              onClose={() => setIsInfoDrawerOpen(false)}
+              title="Property Information"
+              widthClass="lg:w-1/3 w-full "
+            >
+              {isInfoDrawerOpen && (
+                <PropertyInfoDrawer
+                  property={propertiesInfo}
+                  onClose={() => setIsInfoDrawerOpen(false)}
+                />
+              )}
+            </Drawer>
           </div>
         )}
       </div>

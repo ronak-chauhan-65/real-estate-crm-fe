@@ -2,6 +2,8 @@ import React from "react";
 import Tooltip from "../../components/Tooltip/Tooltip";
 
 const BuilidingTableRow = React.memo(({ item, onEdit, onDelete }) => {
+  console.log(item, "itemitemitem");
+
   return (
     <tr
       className={`table-auto hover:bg-black/[0.03] border-b border-gray-200 h-[5.375rem] max-h-[86px] ${

@@ -1,9 +1,7 @@
-import axios from "axios";
+import axios from "./axiosSetup"; // use the interceptor-enabled axios
 
-// Main common API function
 export const callApi = async (bodyObj = {}) => {
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-  const token = localStorage.getItem("token");
 
   try {
     const {
@@ -14,17 +12,17 @@ export const callApi = async (bodyObj = {}) => {
       params = {},
       id = "",
     } = bodyObj;
+
     if (!endpoint) throw new Error("API endpoint is required");
 
     const url = id ? `${BASE_URL}${endpoint}/${id}` : `${BASE_URL}${endpoint}`;
 
     const config = {
-      url: url,
+      url,
       method,
+      withCredentials: true,
       headers: {
         "Content-Type": "application/json",
-        Authorization: token,
-        "ngrok-skip-browser-warning": "true",
         ...headers,
       },
       data: method !== "GET" ? body : undefined, // for POST, PUT, DELETE
@@ -34,17 +32,10 @@ export const callApi = async (bodyObj = {}) => {
     const response = await axios(config);
     return { success: true, data: response.data };
   } catch (error) {
-    console.error("API Call Error:", error);
-    // throw error.response || error.message;
-
     return {
       success: false,
       status: error.response?.status || 500,
-      message:
-        error.response?.data?.message ||
-        error.message ||
-        "Something went wrong",
-      error: error.response?.data || null,
+      message: error.response?.data?.message || error.message,
     };
   }
 };

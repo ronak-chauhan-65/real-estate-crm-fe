@@ -33,7 +33,6 @@ function MainLayout() {
     { name: "Building", icon: "apartment", link: "/building" },
     { name: "Property", icon: "location_city", link: "/property" },
 
-   
     {
       name: "Settings",
       icon: "settings",
@@ -62,7 +61,7 @@ function MainLayout() {
   ];
 
   return (
-    <div className="flex  h-screen bg-base-100 w-full overflow-x-hidden brder     overflow-y-hidden">
+    <div className="flex  h-screen bg-base-100 w-full overflow-x-hidden brder   w-full  overflow-y-hidden">
       {/* Sidebar */}
       <Sidebar3
         SidebarMenu={SidebarMenu}
@@ -77,7 +76,7 @@ function MainLayout() {
         className="w-full transition-all h-full duration-300 ease-in-out  "
         // style={{ marginLeft: sideExpand ? "250px" : "80px" }}
       >
-        <div className=" w-full z-[13]">
+        <div className=" w-[calc(100%-80px)] md:w-full sm:w-full">
           <Header sideExpand={sideExpand} onToggleSidebar={toggleSidebar} />
         </div>
         <main className="  w-full  mt-[2rem] h-[90vh]  overflow-auto     ">
