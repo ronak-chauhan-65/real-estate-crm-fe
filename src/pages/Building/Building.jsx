@@ -13,6 +13,7 @@ import useClickOutside from "../../CustomHook/useClickOutside";
 import Table from "../../components/Table/Table";
 import NodataFound from "../../components/NoDataFound/NodataFound";
 import BuilidingTableRow from "./BuilidingTableRow";
+import Inquiry from "../Inquiry/Inquiry";
 
 function Building() {
   // State Declarations

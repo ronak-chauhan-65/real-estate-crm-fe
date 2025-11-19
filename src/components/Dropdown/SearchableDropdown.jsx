@@ -19,7 +19,7 @@ const SearchableDropdown = ({
   labelKey = "area",
 }) => {
   const [selectedValue, setSelectedValue] = useState(value?.id || "");
-  const [selectedLabel, setSelectedLabel] = useState(value?.area || "");
+  const [selectedLabel, setSelectedLabel] = useState(value[labelKey] || "");
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -123,7 +123,7 @@ const SearchableDropdown = ({
                         : "text-gray-700"
                     }`}
                   >
-                    {item[labelKey]}
+                    {item[labelKey]} 
                   </a>
                 </li>
               ))

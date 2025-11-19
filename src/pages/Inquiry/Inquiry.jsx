@@ -8,6 +8,9 @@ import React, {
 import useClickOutside from "../../CustomHook/useClickOutside";
 import Drawer from "../../components/Drawer/Drawer";
 import Table from "../../components/Table/Table";
+import InquiryDrawer from "./InquiryDrawer";
+import { showToast } from "../../utils/toastUtils";
+import { InquiryAPI } from "../../components/APICalls/inquiryAPI";
 
 function Inquiry() {
   const [showFilter, setshowFilter] = useState(false);
@@ -29,10 +32,55 @@ function Inquiry() {
     totalPages: 0,
     areas: [],
   });
+  const [validationObj, setvalidationObj] = useState({});
+
+  const [formData, setFormData] = useState({
+    clientName: "",
+    mobile: "",
+    email: "",
+    isNri: false,
+    enquiryFor: "",
+    requirementType: "",
+    propertyType: [],
+    configuration: [],
+    areaSizeFrom: "",
+    areaSizeTo: "",
+    areaMeasurementUnit: "",
+    enquirySource: "",
+    furnishedStatus: "",
+    budgetFrom: "",
+    budgetTo: "",
+    budgetUnit: "",
+    purpose: "",
+    building: "",
+    status: "Active",
+    projectStatus: "",
+    area: "",
+    isPreLeased: false,
+    noCareCustomer: false,
+    otherContacts: [
+      {
+        name: "",
+        nri: false,
+        contactNo: "",
+        status: "",
+      },
+    ],
+    remarksTelephonicDiscussion: "",
+    highlights: "",
+    city: "",
+    branch: "",
+    employee: "",
+  });
 
   const ref = useRef();
 
   useClickOutside(ref, () => setshowFilter(false));
+
+  // Update drawer  field values
+  const handleChange = useCallback((field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  }, []);
 
   // handle search parameter change for get api
   const handleParamsChange = (e) => {
@@ -74,7 +122,56 @@ function Inquiry() {
   };
 
   // save the area using drawer
-  const handleSave = async () => {};
+  const handleSave = async () => {
+    const payload = {
+      ...formData,
+      budgetFrom: formData.budgetFrom + formData.budgetUnit,
+      budgetTo: formData.budgetTo + formData.budgetUnit,
+    };
+
+    try {
+      let response;
+      if (!onEditID) {
+        response = await InquiryAPI.PostInquiry(payload);
+      } else if (onEditID) {
+        response = await InquiryAPI.UpdateBuilding(onEditID, payload);
+      }
+    } catch (error) {
+      console.error("Error saving building:", err);
+      showToast("error", "Server error while saving building");
+    }
+  };
+
+  // ADD Contact Section
+  const addContactSection = () => {
+    setFormData((prev) => {
+      if (prev.otherContacts?.length >= 2) return prev;
+      return {
+        ...prev,
+        otherContacts: [
+          ...(prev.otherContacts || []),
+          { name: "", number: "" },
+        ],
+      };
+    });
+  };
+
+  // REMOVE Contact Section
+  const removeContactSection = (index) => {
+    setFormData((prev) => {
+      const updated = prev.otherContacts.filter((_, i) => i !== index);
+      return { ...prev, otherContacts: updated };
+    });
+  };
+
+  // HANDLE Contact Field Change
+  const handleContactChange = (index, field, value) => {
+    setFormData((prev) => {
+      const updated = [...prev.otherContacts];
+      updated[index][field] = value;
+      return { ...prev, otherContacts: updated };
+    });
+  };
 
   // Drawer Footer
   const drawerFooter = (
@@ -158,12 +255,24 @@ function Inquiry() {
             position="end"
             footer={drawerFooter}
             onEditID={onEditID}
+            widthClass=" lg:w-1/2 w-full   "
           >
             {/* <AreaDrawerContent
               formData={formData}
               validationObj={validationObj}
               handleChange={handleChange}
             /> */}
+            {isDrawerOpen && (
+              <InquiryDrawer
+                formData={formData}
+                handleChange={handleChange}
+                validationObj={validationObj}
+                setFormData={setFormData}
+                addContactSection={addContactSection}
+                removeContactSection={removeContactSection}
+                handleContactChange={handleContactChange}
+              />
+            )}
           </Drawer>
         </div>
       </div>

@@ -13,6 +13,7 @@ axios.interceptors.response.use(
 
     if (status === 401) {
       store.dispatch(logout());
+      localStorage.removeItem("user");
       navigateTo("/login"); // 🔥 Redirect WITHOUT page refresh!
       showToast("error", "Session expired. Please log in again.");
     }

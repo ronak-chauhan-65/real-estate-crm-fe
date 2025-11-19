@@ -12,8 +12,6 @@ const MultiSelectDropdown = ({
   label = "",
   required = false,
 }) => {
- 
-
   const popoverId = useId();
   const anchorName = `--anchor-${popoverId}`;
   const [selectedValues, setSelectedValues] = useState(value || []);
@@ -79,6 +77,11 @@ const MultiSelectDropdown = ({
         className={`dropdown menu absolute  rounded-box bg-base-100 shadow-sm ${widthClass} ${className}`}
         style={{ positionAnchor: anchorName }}
       >
+        {items.length === 0 && (
+          <li className="text-center py-1 text-gray-400 select-none">
+            No Data Found
+          </li>
+        )}
         {items.map((item, idx) => (
           <li key={idx}>
             <label

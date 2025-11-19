@@ -76,7 +76,7 @@ function MainLayout() {
         className="w-full transition-all h-full duration-300 ease-in-out  "
         // style={{ marginLeft: sideExpand ? "250px" : "80px" }}
       >
-        <div className=" w-[calc(100%-80px)] md:w-full sm:w-full">
+        <div className=" w-[calc(100%-30px)] md:w-full sm:w-full">
           <Header sideExpand={sideExpand} onToggleSidebar={toggleSidebar} />
         </div>
         <main className="  w-full  mt-[2rem] h-[90vh]  overflow-auto     ">

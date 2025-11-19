@@ -42,7 +42,7 @@ function UserProfile({ fullName = "", userType = "" }) {
         title="Delete Product"
         message="Are you sure you want to delete this product from your account?"
         onYes={() => {
-          localStorage.removeItem("token");
+          localStorage.removeItem("user");
           navigate("/login");
           setOpenModal(false);
         }}

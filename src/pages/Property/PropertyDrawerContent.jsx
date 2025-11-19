@@ -50,7 +50,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
       status: "active",
       searchKey: searchKey,
     });
-    console.log(response, "responsebuilinfnd");
+  
 
     setbuildingName(response?.data?.buildings);
   };
@@ -85,7 +85,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
     setAllConfigurations(configurationFormat);
 
     setpropertySpecificType(specificTypeFormat);
-    setconfiguration(configurationFormat);
+    // setconfiguration(configurationFormat);
     //   ?
     // .map(
     //   (cg) => ({ label: cg.name, value: cg._id })
@@ -134,6 +134,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
     setPriority(priorityFormat);
     setPropertySource(propertySourceFormat);
   };
+
   useEffect(() => {
     if (!formData.propertyType) {
       // Show ALL
@@ -590,7 +591,6 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
                     placeholder={field.placeholder}
                     value={formData[field.name]}
                     onChange={(selected) => {
-                      console.log(selected, "pppppppppp");
                       handleChange(field.name, selected?.display);
                     }}
                   />
@@ -717,6 +717,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
                   placeholder="Enter unit number"
                   type="number"
                   value={owner.unitNo}
+                  area
                   onChange={(e) =>
                     handleUnitDetails(index, "unitNo", e.target.value)
                   }
