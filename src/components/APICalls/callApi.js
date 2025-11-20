@@ -2,7 +2,7 @@ import axios from "./axiosSetup"; // use the interceptor-enabled axios
 
 export const callApi = async (bodyObj = {}) => {
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
+  const token = localStorage.getItem("token");
   try {
     const {
       endpoint = "",
@@ -20,10 +20,11 @@ export const callApi = async (bodyObj = {}) => {
     const config = {
       url,
       method,
-      withCredentials: true,
+      withCredentials: false,
       headers: {
         "Content-Type": "application/json",
         // "ngrok-skip-browser-warning": "true",
+        Authorization: token,
         ...headers,
       },
       data: method !== "GET" ? body : undefined, // for POST, PUT, DELETE

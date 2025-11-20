@@ -12,11 +12,13 @@ import { Navigate } from "react-router-dom";
 import Buildingconfiguration from "../pages/BuildingConfiguration/Buildingconfiguration";
 import Propertyconfiguration from "../pages/PropertyConfiguration/Propertyconfiguration";
 import Enquiryconfiguration from "../pages/EnquiryConfiguration/Enquiryconfiguration";
+import ShowFollowUp from "../pages/Inquiry/ShowFollowUp";
 
 export const appRoutes = [
   { path: "/", element: <Navigate to="/dashboard" replace /> },
   { path: "/dashboard", label: "Dashboard", element: <Dashboard /> },
   { path: "/inquiry", label: "Inquiry", element: <Inquiry /> },
+  { path: "/inquiry/:id", label: "Inquiry", element: <ShowFollowUp /> },
   { path: "/area", label: "Area", element: <Area /> },
   { path: "/building", label: "Building", element: <Building /> },
   { path: "/property", label: "Property", element: <Property /> },

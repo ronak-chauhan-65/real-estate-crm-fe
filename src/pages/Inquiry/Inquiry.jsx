@@ -11,12 +11,23 @@ import Table from "../../components/Table/Table";
 import InquiryDrawer from "./InquiryDrawer";
 import { showToast } from "../../utils/toastUtils";
 import { InquiryAPI } from "../../components/APICalls/inquiryAPI";
+import NodataFound from "../../components/NoDataFound/NodataFound";
+import InquiryTableRow from "./InquiryTableRow";
+import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function Inquiry() {
   const [showFilter, setshowFilter] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [onEditID, setonEditID] = useState("");
   const [loader, setloader] = useState(false);
+  const [isRefresh, setisRefresh] = useState(false);
+
+  const ref = useRef();
+  const navigate = useNavigate();
+
+  useClickOutside(ref, () => setshowFilter(false));
+
   const [getApiParams, setgetApiParams] = useState({
     perPage: 10,
     currentPage: 1,
@@ -24,13 +35,13 @@ function Inquiry() {
     searchKey: "",
   });
 
-  const [getAreas, setgetAreas] = useState({
+  const [getInquiry, setgetInquiry] = useState({
     currentPage: 1,
     perPage: 10,
     success: true,
     totalCount: 0,
     totalPages: 0,
-    areas: [],
+    enquiries: [],
   });
 
   const [formData, setFormData] = useState({
@@ -182,9 +193,50 @@ function Inquiry() {
     );
   };
 
-  const ref = useRef();
+  // get Porperty
+  const getAllInquiry = async () => {
+    setloader(true);
+    const response = await InquiryAPI.getInquiry({
+      perPage: getApiParams?.perPage,
+      currentPage: getApiParams?.currentPage,
+      status: getApiParams?.status,
+      searchKey: getApiParams?.searchKey,
+    });
 
-  useClickOutside(ref, () => setshowFilter(false));
+    const data = response?.data;
+  
+    setgetInquiry({
+      currentPage: data?.currentPage ?? 1,
+      perPage: data?.perPage ?? 10,
+      success: data?.success ?? false,
+      totalCount: data?.totalCount ?? 0,
+      totalPages: data?.totalPages ?? 0,
+      enquiries: data?.enquiries ?? [],
+    });
+
+    setloader(false);
+  };
+
+  // call get api base on get paraneter  change
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      // Fetch when user clears search OR types 3+ characters
+      if (
+        getApiParams.searchKey.length === 0 ||
+        getApiParams.searchKey.length >= 3
+      ) {
+        getAllInquiry();
+      }
+    }, 200); // 400ms debounce to prevent spam API calls
+
+    return () => clearTimeout(delayDebounce);
+  }, [
+    isRefresh,
+    getApiParams.currentPage,
+    getApiParams.perPage,
+    getApiParams.status,
+    getApiParams.searchKey,
+  ]);
 
   // Update drawer  field values
   const handleChange = useCallback((field, value) => {
@@ -205,12 +257,12 @@ function Inquiry() {
   // Table Configuration
   const tableHeaderData = useMemo(
     () => [
-      { name: "Area", isSort: false },
-      { name: "Pincode", isSort: false },
-      { name: "City", isSort: false },
-      { name: "State", isSort: false },
+      { name: "Client Name", isSort: false },
+      { name: "Client Requirement", isSort: false },
+      { name: "Budget", isSort: false },
+      { name: "NFD", isSort: false },
 
-      { name: "Updated At", isSort: false },
+      { name: "Assigned To/Created On", isSort: false },
       { name: "Action", isSort: false, center: true },
     ],
     []
@@ -284,6 +336,39 @@ function Inquiry() {
       return { ...prev, otherContacts: updated };
     });
   };
+
+  const handleEdit = useCallback(async (data) => {}, []);
+
+  // delete base on id
+  const handleDelete = useCallback(async (id) => {}, []);
+
+  const handleFollowUp = useCallback(async (id) => {
+    navigate("/inquiry/2");
+  }, []);
+
+  // table row
+  const rows = useMemo(() => {
+    // If no areas, show "No data"
+    if (!getInquiry?.enquiries || getInquiry?.enquiries.length === 0) {
+      return (
+        <tr>
+          <td colSpan="100%" className="text-center py-4 text-gray-500 ">
+            <NodataFound />
+          </td>
+        </tr>
+      );
+    }
+    // Otherwise render area rows
+    return getInquiry.enquiries.map((item) => (
+      <InquiryTableRow
+        key={item._id || item.id} // use _id if API gives it
+        item={item}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onFollowUp={handleFollowUp}
+      />
+    ));
+  }, [getInquiry, handleEdit]);
 
   // Drawer Footer
   const drawerFooter = (
@@ -397,7 +482,7 @@ function Inquiry() {
             <Table
               tableHeaderData={tableHeaderData}
               showPagination={true}
-              totalData={getAreas?.totalCount}
+              totalData={getInquiry?.totalCount}
               scrollToTop={true}
               currentPage={getApiParams?.currentPage}
               perPage={getApiParams?.perPage}
@@ -410,7 +495,7 @@ function Inquiry() {
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
             >
-              {/* {rows} */}
+              {rows}
             </Table>
           </div>
         )}

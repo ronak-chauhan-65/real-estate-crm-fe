@@ -7,6 +7,6 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     host: true,
-    allowedHosts: ["knitted-anarthrously-jeanelle.ngrok-free.dev"],
+    allowedHosts: ["*"],
   },
 });

@@ -22,6 +22,7 @@ const authSlice = createSlice({
       state.isLoggedIn = true;
 
       // store in localStorage
+      localStorage.setItem("token", `Bearer ${token}`);
       localStorage.setItem("user", JSON.stringify(user));
     },
 

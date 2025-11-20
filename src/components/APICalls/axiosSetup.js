@@ -4,7 +4,7 @@ import { logout } from "../../redux/authSlice";
 import { navigateTo } from "./navigation";
 import { showToast } from "../../utils/toastUtils";
 
-axios.defaults.withCredentials = true;
+// axios.defaults.withCredentials = true;
 
 axios.interceptors.response.use(
   (response) => response,

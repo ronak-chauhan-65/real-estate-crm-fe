@@ -296,7 +296,7 @@ function Property() {
     searchKey: "",
   });
 
-  // get Area
+  // get Porperty
   const getPropertyRow = async () => {
     setloader(true);
     const response = await ProprtyAPI.getProperty({
