@@ -107,6 +107,8 @@ function Property() {
     //  Status
     activeStatus: true,
   });
+
+  // validation object
   const [validationObj, setValidationObj] = useState({
     // Property Information
     propertyForError: false,
@@ -543,26 +545,26 @@ function Property() {
     const property = response?.data?.property;
 
     setFormData({
-      // 🔹 Building Name (object {label, value})
+      //  Building Name (object {label, value})
       buildingName: {
         _id: property?.buildingName?._id,
         label: property?.buildingName?.buildingName,
       },
 
-      // 🔹 Top Level Dropdowns
+      //  Top Level Dropdowns
       propertyFor: property?.propertyFor?._id,
       propertyType: property?.propertyType?._id,
       specificProperty: property?.specificProperty?._id,
       configuration: property?.configuration?._id,
 
-      // 🔹 Basic Details
+      //  Basic Details
       address: property?.address || "",
       landmark: property?.buildingName?.landMark || "",
       wing: property?.wing || "",
       unitNo: property?.unitNo || "",
       status: property?.status || "Active",
 
-      // 🔹 Area Details
+      //  Area Details
       carpetArea: property?.carpetArea || "",
       carpetMeasurement: property?.carpetMeasurement?._id || "",
       superBuiltUpArea: property?.superBuiltUpArea || "",
@@ -572,11 +574,11 @@ function Property() {
       terrace: property?.terrace || "",
       terraceMeasurement: property?.terraceMeasurement?._id || "",
 
-      // 🔹 Flags
+      //  Flags
       hotProperty: property?.hotProperty || false,
       shareToOtherBrokers: property?.shareToOtherBrokers || false,
 
-      // 🔹 Other Dropdowns
+      //  Other Dropdowns
       furnishedStatus: property?.furnishedStatus?._id || "",
       fourWheelerParking: property?.fourWheelerParking || "",
       twoWheelerParking: property?.twoWheelerParking || "",
@@ -585,16 +587,16 @@ function Property() {
       sourceOfProperty: property?.sourceOfProperty?._id || "",
       reference: property?.reference || "",
 
-      // 🔹 Pre-Leased
+      //  Pre-Leased
       preLeased: property?.preLeased || false,
       preLeasedRemarks: property?.preLeasedRemarks || "",
 
-      // 🔹 Price & Remarks
+      //  Price & Remarks
       price: property?.price || "",
       priceRemarks: property?.priceRemarks || "",
       remarks: property?.remarks || "",
 
-      // 🔹 Owner Details
+      //  Owner Details
       owner: property?.owner?._id || "",
       email: property?.email || "",
       nri: property?.nri || false,
@@ -608,7 +610,7 @@ function Property() {
           }))
         : [{ name: "", contactNo: "", status: "Not Contactable" }],
 
-      // 🔹 Units
+      //  Units
       unitDetails: property?.unitDetails?.length
         ? property?.unitDetails?.map((u) => ({
             unitNo: u?.unitNo || "",
@@ -616,7 +618,7 @@ function Property() {
           }))
         : [{ unitNo: "", status: "" }],
 
-      // 🔹 Caretaker
+      //  Caretaker
       careTakerName: property?.careTakerName || "",
       careTakerContactNo: property?.careTakerContactNo || "",
       keyArrangement: property?.keyArrangement || "",

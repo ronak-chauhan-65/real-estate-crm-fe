@@ -7,6 +7,9 @@ import { AreaApiList } from "../../components/APICalls/areaApi";
 import { getMasterConfigg } from "../../components/APICalls/masterConfig";
 import RangeSelector from "../../components/Input/RangeSelector";
 import { BuildingApi } from "../../components/APICalls/BuildingApi";
+import { UserApiList } from "../../components/APICalls/userApi";
+import TextareaTag from "../../components/Input/TextareaTag";
+import MobileInputWithCode from "../../components/Input/MobileInputWithCode";
 
 const InquiryDrawer = React.memo(function InquiryDrawer({
   formData,
@@ -39,15 +42,27 @@ const InquiryDrawer = React.memo(function InquiryDrawer({
 
   const [areas, setAreas] = useState([]);
 
+  const [users, setUsers] = useState([]);
+
   // Fetch building list once
   const getbuilgingName = async (searchKey = "") => {
     const response = await BuildingApi.getBuilding({
       status: "active",
       searchKey: searchKey,
     });
-    console.log(response, "response");
 
     setbuildingName(response?.data?.buildings);
+  };
+
+  const getUser = async () => {
+    const response = await UserApiList.getUser();
+
+    const userFormat = response?.data?.map((v) => ({
+      label: v.name,
+      value: v._id,
+    }));
+
+    setUsers(userFormat);
   };
 
   // Fetch area list once
@@ -133,23 +148,10 @@ const InquiryDrawer = React.memo(function InquiryDrawer({
     setPropertyStatus(propertyStatus);
   };
 
-  // useEffect(() => {
-  //   if (!initialLoaded) {
-  //     getArea("");
-  //     setInitialLoaded(true);
-  //   }
-  // }, [initialLoaded]);
-
   useEffect(() => {
     getPropertyTypes();
+    getUser();
   }, []);
-
-  // // Call API when user types 3+ letters
-  // useEffect(() => {
-  //   if (searchValue.length >= 3 || searchValue == "") {
-  //     getArea(searchValue);
-  //   }
-  // }, [searchValue]);
 
   // --- SECTIONS CONFIGS FOR ENQUIRY ---
   const enquirySections = [
@@ -164,7 +166,7 @@ const InquiryDrawer = React.memo(function InquiryDrawer({
           required: true,
         },
         {
-          type: "text",
+          type: "MobileInputWithCode",
           name: "mobile",
           label: "Mobile Number",
           placeholder: "Enter mobile number",
@@ -192,7 +194,11 @@ const InquiryDrawer = React.memo(function InquiryDrawer({
           label: "Enquiry For",
           placeholder: "Select enquiry type",
           required: true,
-          items: ["Rent", "Buy", "Sell & Rent"],
+          items: [
+            { label: "Rent", value: "Rent" },
+            { label: "Buy", value: "Buy" },
+            { label: "Sell & Rent", value: "Sell & Rent" },
+          ],
         },
         {
           type: "dropdown",
@@ -229,6 +235,8 @@ const InquiryDrawer = React.memo(function InquiryDrawer({
           placeholderTo: "To area",
           unitKey: "areaMeasurementUnit",
           unitItems: unitmesurment,
+          required: true,
+          errorKey: "areaSizeError",
         },
 
         {
@@ -256,7 +264,10 @@ const InquiryDrawer = React.memo(function InquiryDrawer({
           unitItems: [
             { value: "Thousand", label: "Thousand" },
             { value: "Lakh", label: "Lakh" },
+            { value: "Crore", label: "Crore" },
           ],
+          required: true,
+          errorKey: "budgetError",
         },
         {
           type: "dropdown",
@@ -324,36 +335,26 @@ const InquiryDrawer = React.memo(function InquiryDrawer({
           type: "textarea",
           name: "remarksTelephonicDiscussion",
           label: "Telephonic Discussion",
+          placeholder: "Add telephonic Discussion",
         },
-        { type: "textarea", name: "highlights", label: "Highlights" },
+        {
+          type: "textarea",
+          name: "highlights",
+          label: "Highlights",
+          placeholder: "Add highlights ",
+        },
       ],
     },
     {
       title: "Enquiry Allocation",
       fields: [
         {
-          type: "searchdropdown",
-          name: "city",
-          label: "City",
-          placeholder: "Select city",
-          required: true,
-          items: [],
-        },
-        {
-          type: "searchdropdown",
-          name: "branch",
-          label: "Branch",
-          placeholder: "Select branch",
-          required: true,
-          items: [],
-        },
-        {
-          type: "searchdropdown",
+          type: "dropdown",
           name: "employee",
           label: "Employee",
           placeholder: "Select employee",
           required: true,
-          items: [],
+          items: users,
         },
       ],
     },
@@ -384,9 +385,11 @@ const InquiryDrawer = React.memo(function InquiryDrawer({
           key={sIdx}
           className="border border-accent rounded-[16px] p-4 bg-base-100 shadow-md "
         >
-          <h3 className="text-lg font-semibold text-info mb-3">
-            {section.title}
-          </h3>
+          {section.title && (
+            <h3 className="text-lg font-semibold text-info mb-3 border-b border-info pb-3">
+              {section.title}
+            </h3>
+          )}
 
           {/* Input Fields */}
           {section.fields && (
@@ -470,17 +473,8 @@ const InquiryDrawer = React.memo(function InquiryDrawer({
                         isplaceholder="Search building"
                         onSelect={(selectedItem, rawItem) => {
                           //  'selectedItem' is { id, area }
-                          // 'rawItem' is the full API item (has city, state, pincode)
 
                           handleChange(field.name, selectedItem); //  store { id, area } in formData
-
-                          //  auto-fill related fields
-                          // setFormData((prev) => ({
-                          //   ...prev,
-                          //   city: rawItem.city || prev.city,
-                          //   state: rawItem.state || prev.state,
-                          //   pincode: rawItem.pincode || prev.pincode,
-                          // }));
                         }}
                         labelKey={field?.labelKey}
                         widthClass="w-full"
@@ -535,13 +529,49 @@ const InquiryDrawer = React.memo(function InquiryDrawer({
                       onToChange={(val) => handleChange(field.toKey, val)}
                       onUnitChange={(val) => handleChange(field.unitKey, val)}
                     />
+                  ) : field.type === "MobileInputWithCode" ? (
+                    <MobileInputWithCode
+                      required={true}
+                      codeValue={formData.mobileCode}
+                      numberValue={formData.mobile}
+                      onCodeChange={(item) => {
+                        console.log(item, "item item"),
+                          handleChange("mobileCode", item);
+                      }}
+                      onNumberChange={(val) => handleChange("mobile", val)}
+                    />
+                  ) : field.type === "textarea" ? (
+                    <TextareaTag
+                      label={field.label}
+                      placeholder={field.placeholder}
+                      value={formData?.[field.name] || ""}
+                      onChange={(e) => handleChange(field.name, e.target.value)}
+                      required={field.required}
+                      disabled={field.disabled}
+                      rows={field.rows}
+                    />
                   ) : null}
 
-                  {validationObj?.[`${field.name}Error`] && (
-                    <p className="text-error text-[12px] absolute bottom-[-18px]">
-                      {validationObj[`${field.name}Error`]}
-                    </p>
-                  )}
+                  {field.required &&
+                    field.type !== "RangeSelector" &&
+                    validationObj?.[`${field.name}Error`] && (
+                      <p className="text-red-500 text-[12px] absolute bottom-[-17px]">
+                        {field.name === "address"
+                          ? `${field.label} must be at least 5 characters`
+                          : field.name === "mobile"
+                          ? `${field.label} must be exactly 10 digits`
+                          : `${field.label} must be at least 2 characters`}
+                      </p>
+                    )}
+
+                  {/* RangeSelector error */}
+                  {field.type === "RangeSelector" &&
+                    field.required &&
+                    validationObj?.[field.errorKey] && (
+                      <p className="text-red-500 text-[12px] absolute bottom-[-17px]">
+                        {field.label} is required
+                      </p>
+                    )}
                 </div>
               ))}
             </div>
@@ -565,12 +595,6 @@ const InquiryDrawer = React.memo(function InquiryDrawer({
           )}
         </div>
       ))}
-      {/* <RangeSelector
-        label="Area Range"
-        value={areaRange}
-        onChange={(val) => setAreaRange(val)}
-        units={measurementUnits}
-      /> */}
 
       {/* Contact Details Section */}
       <div className="border border-accent rounded-[16px] p-4 bg-base-100 shadow-md">
@@ -589,7 +613,7 @@ const InquiryDrawer = React.memo(function InquiryDrawer({
         {formData?.otherContacts?.map((contact, index) => (
           <div
             key={index}
-            className="relative border border-base-200 rounded-lg p-4 mb-4"
+            className="relative border border-base-200 rounded-lg p-1 "
           >
             {index !== 0 && (
               <button
@@ -599,28 +623,55 @@ const InquiryDrawer = React.memo(function InquiryDrawer({
                 ✕
               </button>
             )}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center justify-center ">
               <InputTag
                 label="Contact Person Name"
                 placeholder="Enter name"
-                value={contact.contactPersonName}
+                value={contact.name}
                 onChange={(e) =>
-                  handleContactChange(
-                    index,
-                    "contactPersonName",
-                    e.target.value
-                  )
+                  handleContactChange(index, "name", e.target.value)
                 }
               />
               <InputTag
                 label="Contact Number"
                 placeholder="Enter phone number"
                 type="number"
-                value={contact.contactPersonNo}
-                onChange={(e) =>
-                  handleContactChange(index, "contactPersonNo", e.target.value)
-                }
+                value={contact.contactNo}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val.length <= 10) {
+                    handleContactChange(index, "contactNo", e.target.value);
+                  }
+                }}
               />
+              <div className="  flex items-center">
+                <label className="flex items-center gap-2 mt-2">
+                  <input
+                    type="checkbox"
+                    checked={contact.nri}
+                    onChange={(e) =>
+                      handleContactChange(index, "nri", e.target.checked)
+                    }
+                    className="toggle border-info bg-accent checked:border-info checked:bg-info"
+                  />
+                  <span>NRI</span>
+                </label>{" "}
+              </div>
+              <label className="flex items-center gap-2 mt-2">
+                <input
+                  type="checkbox"
+                  checked={contact.status === "Contactable"}
+                  onChange={(e) =>
+                    handleContactChange(
+                      index,
+                      "status",
+                      e.target.checked ? "Contactable" : "Not Contactable"
+                    )
+                  }
+                  className="toggle border-info bg-accent checked:border-info checked:bg-info"
+                />
+                <span>Status</span>
+              </label>
             </div>
           </div>
         ))}

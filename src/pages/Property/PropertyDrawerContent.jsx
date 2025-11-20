@@ -50,7 +50,6 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
       status: "active",
       searchKey: searchKey,
     });
-  
 
     setbuildingName(response?.data?.buildings);
   };
@@ -584,6 +583,7 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
                     }
                   />
                 )}
+
                 {field.type === "NumberwithUnitSelect" && (
                   <NumberWithUnitsSelect
                     label={field.label}
@@ -718,9 +718,12 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
                   type="number"
                   value={owner.unitNo}
                   area
-                  onChange={(e) =>
-                    handleUnitDetails(index, "unitNo", e.target.value)
-                  }
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val.length <= 10) {
+                      handleUnitDetails(index, "unitNo", e.target.value);
+                    }
+                  }}
                 />
               </div>
 
@@ -765,9 +768,13 @@ const PropertyDrawerContent = React.memo(function PropertyDrawerContent({
             label="Caretaker Contact"
             placeholder="Enter caretaker number"
             value={formData.careTakerContactNo}
-            onChange={(e) =>
-              handleCaretakerChange("careTakerContactNo", e.target.value)
-            }
+            onChange={(e) => {
+              const val = e.target.value;
+
+              if (val.length <= 10) {
+                handleCaretakerChange("careTakerContactNo", e.target.value);
+              }
+            }}
           />
           <InputTag
             label="Key Arrangement"

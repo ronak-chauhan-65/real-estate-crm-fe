@@ -32,10 +32,10 @@ function Inquiry() {
     totalPages: 0,
     areas: [],
   });
-  const [validationObj, setvalidationObj] = useState({});
 
   const [formData, setFormData] = useState({
     clientName: "",
+    mobileCode: "+91",
     mobile: "",
     email: "",
     isNri: false,
@@ -72,6 +72,115 @@ function Inquiry() {
     branch: "",
     employee: "",
   });
+
+  const [validationObj, setValidationObj] = useState({
+    clientNameError: false,
+    mobileError: false,
+    enquiryForError: false,
+    requirementTypeError: false,
+    propertyTypeError: false,
+    configurationError: false,
+    areaSizeFromError: false,
+    areaSizeToError: false,
+    areaMeasurementUnitError: false,
+    enquirySourceError: false,
+
+    budgetFromError: false,
+    budgetToError: false,
+    budgetUnitError: false,
+    statusError: false,
+    employeeError: false,
+  });
+
+  const formValidation = () => {
+    // CUSTOMER INFORMATION
+    const clientNameError =
+      !formData?.clientName || formData.clientName.trim() === "";
+
+    const mobileError = !formData.mobile || formData.mobile.length !== 10;
+    console.log(formData.mobileCode, "ppppp");
+
+    const mobileCodeError = !formData.mobileCode || formData.mobileCode === "";
+
+    const fullMobileError =
+      !formData.mobileCode || !formData.mobile || formData.mobile.length !== 10;
+
+    // CUSTOMER REQUIREMENT
+    const enquiryForError = !formData?.enquiryFor || formData.enquiryFor === "";
+
+    const requirementTypeError =
+      !formData?.requirementType || formData.requirementType === "";
+
+    const propertyTypeError =
+      !formData?.propertyType || formData.propertyType?.length === 0;
+
+    const configurationError =
+      !formData?.configuration || formData.configuration?.length === 0;
+
+    // Area Size (RangeSelector)
+    const areaSizeError =
+      !formData?.areaSizeFrom ||
+      isNaN(Number(formData.areaSizeFrom)) ||
+      !formData?.areaSizeTo ||
+      isNaN(Number(formData.areaSizeTo)) ||
+      !formData?.areaMeasurementUnit ||
+      formData.areaMeasurementUnit === "";
+
+    const enquirySourceError =
+      !formData?.enquirySource || formData.enquirySource === "";
+
+    // Budget (RangeSelector)
+    const budgetError =
+      !formData?.budgetFrom ||
+      isNaN(Number(formData.budgetFrom)) ||
+      !formData?.budgetTo ||
+      isNaN(Number(formData.budgetTo)) ||
+      !formData?.budgetUnit ||
+      formData.budgetUnit === "";
+
+    const statusError = !formData?.status;
+    // ALLOCATION
+    const employeeError = !formData?.employee || formData.employee === "";
+
+    // FINAL STATE UPDATE
+    setValidationObj({
+      clientNameError,
+      mobileError,
+      mobileCodeError,
+      fullMobileError,
+
+      enquiryForError,
+      requirementTypeError,
+      propertyTypeError,
+      configurationError,
+
+      areaSizeError,
+
+      enquirySourceError,
+
+      budgetError,
+
+      statusError,
+
+      employeeError,
+    });
+
+    // FINAL RETURN
+    return !(
+      clientNameError ||
+      mobileError ||
+      mobileCodeError ||
+      fullMobileError ||
+      enquiryForError ||
+      requirementTypeError ||
+      propertyTypeError ||
+      configurationError ||
+      areaSizeError ||
+      enquirySourceError ||
+      budgetError ||
+      employeeError
+    );
+  };
 
   const ref = useRef();
 
@@ -125,19 +234,22 @@ function Inquiry() {
   const handleSave = async () => {
     const payload = {
       ...formData,
-      budgetFrom: formData.budgetFrom + formData.budgetUnit,
-      budgetTo: formData.budgetTo + formData.budgetUnit,
+      budgetFrom: formData.budgetFrom + " " + formData.budgetUnit,
+      budgetTo: formData.budgetTo + " " + formData.budgetUnit,
+      mobile: String(formData.mobileCode) + String(formData.mobile),
     };
 
     try {
       let response;
-      if (!onEditID) {
+      console.log(validationObj, "validationObj");
+
+      if (!onEditID && formValidation()) {
         response = await InquiryAPI.PostInquiry(payload);
       } else if (onEditID) {
         response = await InquiryAPI.UpdateBuilding(onEditID, payload);
       }
     } catch (error) {
-      console.error("Error saving building:", err);
+      console.error("Error saving building:", error);
       showToast("error", "Server error while saving building");
     }
   };
@@ -245,7 +357,7 @@ function Inquiry() {
             className="btn btn-info text-accent rounded-[15px]"
             onClick={() => setIsDrawerOpen(true)}
           >
-            <span class="material-symbols-outlined">add</span> Add Inquiry
+            <span className="material-symbols-outlined">add</span> Add Inquiry
           </button>
 
           <Drawer
@@ -257,11 +369,6 @@ function Inquiry() {
             onEditID={onEditID}
             widthClass=" lg:w-1/2 w-full   "
           >
-            {/* <AreaDrawerContent
-              formData={formData}
-              validationObj={validationObj}
-              handleChange={handleChange}
-            /> */}
             {isDrawerOpen && (
               <InquiryDrawer
                 formData={formData}

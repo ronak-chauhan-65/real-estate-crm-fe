@@ -1,14 +1,21 @@
 import { Navigate } from "react-router-dom";
 
 function ProtectedRoute({ children }) {
-  const isAuthenticated = localStorage.getItem("user");
-  // or use context/auth hook
+  let authObject = null;
 
-  const authObject = JSON.parse(isAuthenticated);
+  try {
+    const storedUser = localStorage.getItem("user");
+    authObject = storedUser ? JSON.parse(storedUser) : null;
+  } catch (err) {
+    console.error("Invalid user in localStorage:", err);
+    authObject = null;
+  }
 
-  if (!authObject.id) {
+  // Redirect if no user or no id
+  if (!authObject || !authObject.id) {
     return <Navigate to="/login" replace />;
   }
+
   return children;
 }
 

@@ -17,9 +17,14 @@ const RangeSelector = ({
 }) => {
   return (
     <div className="w-full">
-      <label className="block font-medium mb-1">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
+      <div className="text-[12px] font-bold">
+        {label && (
+          <legend className="fieldset-legend w-fit">
+            {label}
+            {required && <span className="text-error">*</span>}
+          </legend>
+        )}
+      </div>
 
       <div className="grid grid-cols-12 gap-2">
         {/* FROM */}
